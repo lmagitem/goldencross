@@ -8,6 +8,7 @@ import { ResultsDisplayComponent } from './results-display/results-display.compo
 import { JsonExportComponent } from './json-export/json-export.component';
 import { CalculatorComponent } from './calculator/calculator.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -15,14 +16,10 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     DataEntryComponent,
     ResultsDisplayComponent,
     JsonExportComponent,
-    CalculatorComponent
+    CalculatorComponent,
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    NgbModule
-  ],
+  imports: [BrowserModule, AppRoutingModule, NgbModule, FormsModule],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
