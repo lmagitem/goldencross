@@ -6,7 +6,12 @@
       <p class="d-inline">Where we can put or retreive data in json format.</p>
     </div>
     <div class="card-text">
-      <input type="text" [(ngModel)]="jsonContent" class="css-input w-100" />
+      <input
+        type="text"
+        [(ngModel)]="jsonContent"
+        class="css-input w-100"
+        (input)="onChange($event)"
+      />
     </div>
   </div>
 </div>
