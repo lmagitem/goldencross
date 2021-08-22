@@ -2,8 +2,12 @@
   <div class="card-body">
     <div class="card-title">
       <h5 class="d-inline">Json data</h5>
-      <span>&nbsp;-&nbsp;</span>
+      <span>&nbsp;&nbsp;&nbsp;</span>
       <p class="d-inline">Where we can put or retreive data in json format.</p>
+      <span>&nbsp;&nbsp;&nbsp;</span>
+      <a class="d-inline btn btn-info" role="button" (click)="switchLogging()"
+        >Json logs {{ jsonLog ? "on" : "off" }}</a
+      >
     </div>
     <div class="card-text">
       <input

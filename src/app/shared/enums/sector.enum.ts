@@ -1,3 +1,4 @@
+/** A company sector. */
 export enum Sector {
   AEROSPACE,
   ALCOOLIC_DRINKS,

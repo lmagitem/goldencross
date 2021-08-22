@@ -1,3 +1,4 @@
+/** Which moving averages cross one into another. */
 export enum CrossingType {
   AB = '13->30',
   AC = '13->50',
