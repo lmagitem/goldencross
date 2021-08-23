@@ -24,15 +24,17 @@ export class CalculatorService {
 
   /** Updates the data entry table and the rulesets for result display using the json passed in parameter. */
   public updateData(json: string): void {
-    const data: Export = JSON.parse(json);
+    if (!!json) {
+      const data: Export = JSON.parse(json);
 
-    this.loggingService.log(
-      LogType.JSON_PARSING,
-      'CalculatorService > updateData() - Just received the following:',
-      data
-    );
+      this.loggingService.log(
+        LogType.JSON_PARSING,
+        'CalculatorService > updateData() - Just received the following:',
+        data
+      );
 
-    this.rows.next(data.stocks);
-    this.rulesets.next(data.rulesets);
+      this.rows.next(data.stocks);
+      this.rulesets.next(data.rulesets);
+    }
   }
 }

@@ -2,9 +2,29 @@
   <div class="card-body">
     <div class="card-title">
       <h5 class="d-inline">Input table</h5>
-      <span>&nbsp;&nbsp;&nbsp;</span>
-      <p class="d-inline">Where we'll enter data to be processed.</p>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <p class="d-inline">Where we enter the data to be processed.</p>
     </div>
-    <div class="card-text"></div>
+    <div class="card-text">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col" sortable="name" (sort)="onSort($event)">Name</th>
+            <th scope="col" sortable="sector" (sort)="onSort($event)">
+              Sector
+            </th>
+            <th scope="col" *ngFor="let column of dataEntryColumns">
+              {{ column.name }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let stock of sortedStocks">
+            <th scope="row">{{ stock.name }}</th>
+            <td>{{ stock.sector }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

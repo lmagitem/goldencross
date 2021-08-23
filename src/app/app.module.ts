@@ -9,6 +9,7 @@ import { JsonExportComponent } from './json-export/json-export.component';
 import { CalculatorComponent } from './calculator/calculator.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
+import { SortableHeader } from './shared/directives/sortable-header.directive';
 
 @NgModule({
   declarations: [
@@ -17,6 +18,7 @@ import { FormsModule } from '@angular/forms';
     ResultsDisplayComponent,
     JsonExportComponent,
     CalculatorComponent,
+    SortableHeader,
   ],
   imports: [BrowserModule, AppRoutingModule, NgbModule, FormsModule],
   providers: [],
