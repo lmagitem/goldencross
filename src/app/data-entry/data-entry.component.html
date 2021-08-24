@@ -5,7 +5,7 @@
       <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
       <p class="d-inline">Where we enter the data to be processed.</p>
     </div>
-    <div class="card-text">
+    <div class="card-text overflow-auto">
       <table class="table table-striped">
         <thead>
           <tr>
@@ -13,16 +13,35 @@
             <th scope="col" sortable="sector" (sort)="onSort($event)">
               Sector
             </th>
+            <th scope="col">Period</th>
+            <th scope="col">Previous high</th>
             <th scope="col" *ngFor="let column of dataEntryColumns">
               {{ column.name }}
             </th>
+            <th scope="col">Lowest point</th>
+            <th scope="col">+6M Price</th>
+            <th scope="col">+2Y Price</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let stock of sortedStocks">
-            <th scope="row">{{ stock.name }}</th>
-            <td>{{ stock.sector }}</td>
-          </tr>
+          <ng-container *ngFor="let stock of sortedStocks">
+            <tr *ngFor="let period of stock.periods; let periodIndex = index">
+              <th scope="row" [class.faded]="periodIndex !== 0">
+                {{ stock.name }}
+              </th>
+              <td [class.faded]="periodIndex !== 0">
+                {{ stock.sector }}
+              </td>
+              <td>{{ period.name }}</td>
+              <td>{{ period.previousHigh }}</td>
+              <td *ngFor="let column of dataEntryColumns">
+                {{ getCrossing(column.index, column.type, period) }}
+              </td>
+              <td>{{ period.lowest }}</td>
+              <td>{{ period.priceSixMonths }}</td>
+              <td>{{ period.priceTwoYears }}</td>
+            </tr>
+          </ng-container>
         </tbody>
       </table>
     </div>

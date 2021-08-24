@@ -10,3 +10,16 @@ export enum CrossingType {
   DE = '100->150',
   DF = '100->200',
 }
+
+/** List of the moving average crossings. */
+export const crossingTypeList = [
+  CrossingType.AB,
+  CrossingType.AC,
+  CrossingType.AD,
+  CrossingType.AE,
+  CrossingType.BC,
+  CrossingType.BD,
+  CrossingType.CD,
+  CrossingType.DE,
+  CrossingType.DF,
+];

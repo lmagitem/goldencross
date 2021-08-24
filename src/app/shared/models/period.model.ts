@@ -1,9 +1,10 @@
-import { PriceAtCrossing } from './price-at-crossing.model';
+import { GoldenCross } from './golden-cross.model';
 
 /** Key data points for the analysed period. */
 export interface AnalysedPeriod {
+  name: string;
   previousHigh: number;
-  crossings: Array<PriceAtCrossing>;
+  crossings: Array<GoldenCross>;
   lowest: number;
   priceSixMonths: number;
   priceTwoYears: number;

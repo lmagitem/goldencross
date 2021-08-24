@@ -1,5 +1,19 @@
 .table {
   background-color: #cfc9c9;
+  text-align: center;
+  font-size: 0.8em;
+}
+
+thead > tr > th,
+tbody > tr > th,
+tbody > tr > td {
+  padding: 0.5em;
+}
+
+thead > tr > th {
+  background-color: rgb(90, 86, 86);
+  color: white;
+  border: none;
 }
 
 th[sortable] {
@@ -25,4 +39,8 @@ th[sortable].desc:before {
 th[sortable].desc:before {
   transform: rotate(180deg);
   -ms-transform: rotate(180deg);
+}
+
+.faded {
+  opacity: 0.3;
 }
