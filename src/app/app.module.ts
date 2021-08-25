@@ -8,7 +8,7 @@ import { ResultsDisplayComponent } from './results-display/results-display.compo
 import { JsonExportComponent } from './json-export/json-export.component';
 import { CalculatorComponent } from './calculator/calculator.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SortableHeader } from './shared/directives/sortable-header.directive';
 
 @NgModule({
@@ -20,7 +20,13 @@ import { SortableHeader } from './shared/directives/sortable-header.directive';
     CalculatorComponent,
     SortableHeader,
   ],
-  imports: [BrowserModule, AppRoutingModule, NgbModule, FormsModule],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    NgbModule,
+    FormsModule,
+    ReactiveFormsModule,
+  ],
   providers: [],
   bootstrap: [AppComponent],
 })

@@ -5,6 +5,76 @@
 
 body {
   background-color: darkslategray;
-  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-    "Lucida Sans", Arial, sans-serif;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial,
+    sans-serif;
+}
+
+.neg-price {
+  color: #c21e1e;
+  font-size: 1.1em;
+  text-shadow: rgb(255, 255, 255) 0px 0px 3px;
+}
+
+.neutral-price {
+  color: #cf5c0f;
+  font-size: 1.1em;
+  text-shadow: rgb(255, 255, 255) 0px 0px 3px;
+}
+
+.pos-one-price {
+  color: #bd911a;
+  font-size: 1.1em;
+  text-shadow: rgb(255, 255, 255) 0px 0px 3px;
+}
+
+.pos-two-price {
+  color: #a2a513;
+  font-size: 1.1em;
+  text-shadow: rgb(255, 255, 255) 0px 0px 3px;
+}
+
+.pos-three-price {
+  color: #73ac09;
+  font-size: 1.1em;
+  text-shadow: rgb(255, 255, 255) 0px 0px 3px;
+}
+
+.pos-four-price {
+  color: #2ab300;
+  font-size: 1.1em;
+  text-shadow: rgb(255, 255, 255) 0px 0px 3px;
+}
+
+.pos-five-price {
+  color: #00b60f;
+  font-size: 1.1em;
+  text-shadow: rgb(255, 255, 255) 0px 0px 3px;
+}
+
+.cros-thirteen {
+  color: #20d4d4;
+}
+
+.cros-thirty {
+  color: #daa515;
+}
+
+.cros-fifty {
+  color: #c783ee;
+}
+
+.cros-hundred {
+  color: #f06262;
+}
+
+.cros-hundred-and-fifty {
+  color: #b1b6be;
+}
+
+.cros-two-hundred {
+  color: #4be057;
+}
+
+.smaller {
+  font-size: 0.8em;
 }

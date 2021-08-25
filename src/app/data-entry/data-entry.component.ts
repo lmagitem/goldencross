@@ -10,11 +10,8 @@ import { CalculatorService } from '../calculator/calculator.service';
 import { SortableHeader } from '../shared/directives/sortable-header.directive';
 import { Stock } from '../shared/models/stock.model';
 import * as _ from 'lodash';
-import {
-  SortColumn,
-  SortDirection,
-} from '../shared/directives/sort-direction.enum';
-import { DataEntryColumn } from './data-entry-column.model';
+import { SortColumn, SortDirection } from '../shared/enums/sort-direction.enum';
+import { DataEntryColumn } from '../shared/models/data-entry-column.model';
 import {
   CrossingType,
   crossingTypeList,
@@ -22,6 +19,16 @@ import {
 import { GoldenCross } from '../shared/models/golden-cross.model';
 import { AnalysedPeriod } from '../shared/models/period.model';
 import { ObjectUtils } from '../shared/utils/object.utils';
+import { PriceUtils } from '../shared/utils/price.utils';
+import { Ruleset } from '../shared/models/ruleset.model';
+import { RulesetColumn } from '../shared/models/ruleset-column.model';
+import { CalculatorUtils } from '../shared/utils/calculator.utils';
+import {
+  initialLoggingStatus,
+  LoggingService,
+} from '../shared/services/logging.service';
+import { LogType } from '../shared/services/log-type.enum';
+import { AnalysisResults } from '../shared/models/analysis-results.model';
 
 /** Displays a table used to enter and look at data. */
 @Component({
@@ -34,21 +41,33 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   private subs: SubSink = new SubSink();
   /** The list of dynamically generated columns. */
   dataEntryColumns: Array<DataEntryColumn> = [];
+  /** The list of dynamically generated columns. */
+  rulesetColumns: Array<RulesetColumn> = [];
   /** The entries in the table. */
   stocks: Array<Stock> = [];
   /** The sorted entries in the table. */
   sortedStocks: Array<Stock> = [];
+  /** Is logging enabled for the analysis process? */
+  analysisLog =
+    initialLoggingStatus.find((o) => o.type === LogType.ANALYSIS_PROCESS)
+      ?.enabled || false;
   /** The list of sortable headers. */
   @ViewChildren(SortableHeader) headers: QueryList<SortableHeader> | undefined;
 
-  constructor(private calculatorService: CalculatorService) {}
+  constructor(
+    private calculatorService: CalculatorService,
+    private loggingService: LoggingService
+  ) {}
 
-  /** Listens for the list of rows to display coming from the json export service. */
+  /** Listens for the list of rows and rules coming from the json export service. */
   ngOnInit(): void {
     this.subs.sink = this.calculatorService.rows$.subscribe((rows) => {
       this.generateDataEntryColumns(rows);
       this.stocks = rows;
       this.sortedStocks = rows;
+    });
+    this.subs.sink = this.calculatorService.rulesets$.subscribe((sets) => {
+      this.generateRulesetColumns(sets);
     });
   }
 
@@ -92,7 +111,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
       const columnsForThisType: DataEntryColumn[] = [];
       columnsForThisType.push({
         index: 0,
-        name: type.toString() + ' n°1',
+        name: PriceUtils.getCrossingWithClass(type) + ' n°1',
         type,
       });
 
@@ -101,7 +120,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
         stock.periods?.forEach((period) => {
           for (
             let i = 0;
-            i < period.crossings.filter((c) => c.crossing === type).length;
+            i < period.crossings.filter((c) => c.type === type).length;
             i++
           ) {
             // ... if they have more than X entries (X being the current count) for that type
@@ -109,7 +128,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
               // And add columns accordingly
               columnsForThisType.push({
                 index: columnsForThisType.length,
-                name: type.toString() + ' n°' + (i + 1),
+                name: PriceUtils.getCrossingWithClass(type) + ' n°' + (i + 1),
                 type,
               });
             }
@@ -121,6 +140,12 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Generates columns for each ruleset used to process the data. */
+  generateRulesetColumns(sets: Ruleset[]) {
+    this.rulesetColumns = [];
+    sets.forEach((ruleset) => this.rulesetColumns.push({ ruleset }));
+  }
+
   /** Returns a readable version of the {@link PriceAtCrossing} object corresponding to the given coordinates. */
   public getCrossing(
     index: number,
@@ -129,7 +154,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   ): string {
     // Find the crossings corresponding to the given type and sort them
     const crossings = period.crossings
-      .filter((c) => c.crossing === type)
+      .filter((c) => c.type === type)
       .sort(
         (a, b) =>
           new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
@@ -137,9 +162,42 @@ export class DataEntryComponent implements OnInit, OnDestroy {
 
     // Then if there are indeed some to display, get the one corresponding to the required column
     if (crossings.length > index) {
-      return GoldenCross.getInstance(crossings[index]).toString();
+      return GoldenCross.getInstance(crossings[index]).toHTML((n: number) =>
+        PriceUtils.getPriceAppreciation(
+          n,
+          (period.priceSixMonths + period.priceTwoYears) / 2,
+          period.previousHigh,
+          period.lowest
+        )
+      );
     }
 
     return '-';
+  }
+
+  /** Returns a displayable version of the analysis results corresponding to the given data. */
+  public getAnalysisResults(
+    stock: Stock,
+    period: AnalysedPeriod,
+    ruleset: Ruleset
+  ): string {
+    const results = CalculatorUtils.processDataWithRuleset(
+      stock,
+      period,
+      ruleset
+    );
+    this.loggingService.log(LogType.ANALYSIS_PROCESS, results.log);
+    return PriceUtils.getAnalysisResultsWithClass(results);
+  }
+
+  /** Format number to two digits for display in the table. */
+  public formatToTwoDigits(n: number): string {
+    return (Math.round(n * 100) / 100).toFixed(2);
+  }
+
+  /** When the button to enable logging is clicked, enable/disable logging for that part of the app. */
+  switchLogging() {
+    this.analysisLog = !this.analysisLog;
+    this.loggingService.enableLog(LogType.ANALYSIS_PROCESS, this.analysisLog);
   }
 }

@@ -4,6 +4,10 @@
       <h5 class="d-inline">Input table</h5>
       <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
       <p class="d-inline">Where we enter the data to be processed.</p>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <a class="d-inline btn btn-info" role="button" (click)="switchLogging()"
+        >Analysis logs {{ analysisLog ? "on" : "off" }}</a
+      >
     </div>
     <div class="card-text overflow-auto">
       <table class="table table-striped">
@@ -14,13 +18,18 @@
               Sector
             </th>
             <th scope="col">Period</th>
-            <th scope="col">Previous high</th>
-            <th scope="col" *ngFor="let column of dataEntryColumns">
-              {{ column.name }}
-            </th>
-            <th scope="col">Lowest point</th>
+            <th scope="col">Prev. high</th>
+            <th
+              scope="col"
+              *ngFor="let column of dataEntryColumns"
+              [innerHTML]="column.name"
+            ></th>
+            <th scope="col">Lowest</th>
             <th scope="col">+6M Price</th>
             <th scope="col">+2Y Price</th>
+            <th scope="col" *ngFor="let column of rulesetColumns">
+              {{ column.ruleset.name }}
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -33,13 +42,18 @@
                 {{ stock.sector }}
               </td>
               <td>{{ period.name }}</td>
-              <td>{{ period.previousHigh }}</td>
-              <td *ngFor="let column of dataEntryColumns">
-                {{ getCrossing(column.index, column.type, period) }}
-              </td>
-              <td>{{ period.lowest }}</td>
-              <td>{{ period.priceSixMonths }}</td>
-              <td>{{ period.priceTwoYears }}</td>
+              <td>{{ formatToTwoDigits(period.previousHigh) }}</td>
+              <td
+                *ngFor="let column of dataEntryColumns"
+                [innerHTML]="getCrossing(column.index, column.type, period)"
+              ></td>
+              <td>{{ formatToTwoDigits(period.lowest) }}</td>
+              <td>{{ formatToTwoDigits(period.priceSixMonths) }}</td>
+              <td>{{ formatToTwoDigits(period.priceTwoYears) }}</td>
+              <td
+                *ngFor="let column of rulesetColumns"
+                [innerHTML]="getAnalysisResults(stock, period, column.ruleset)"
+              ></td>
             </tr>
           </ng-container>
         </tbody>

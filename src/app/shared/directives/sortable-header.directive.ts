@@ -1,6 +1,6 @@
 import { Directive, EventEmitter, Input, Output } from '@angular/core';
-import { SortDirection, SortColumn } from './sort-direction.enum';
-import { SortEvent } from './sort-event.model';
+import { SortDirection, SortColumn } from '../enums/sort-direction.enum';
+import { SortEvent } from '../models/sort-event.model';
 
 /** A simple object to return in which direction the sorting must go. */
 const rotate: { [key: string]: SortDirection } = {

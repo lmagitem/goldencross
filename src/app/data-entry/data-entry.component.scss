@@ -1,5 +1,5 @@
 .table {
-  background-color: #cfc9c9;
+  background-color: #f1e7e7;
   text-align: center;
   font-size: 0.8em;
 }
@@ -8,6 +8,12 @@ thead > tr > th,
 tbody > tr > th,
 tbody > tr > td {
   padding: 0.5em;
+  min-width: 54px;
+}
+
+tbody > tr > th,
+tbody > tr > td {
+  vertical-align: middle;
 }
 
 thead > tr > th {
