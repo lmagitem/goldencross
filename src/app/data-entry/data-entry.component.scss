@@ -22,12 +22,16 @@ thead > tr > th {
   border: none;
 }
 
-th[sortable] {
+.sortable {
   cursor: pointer;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
   -webkit-user-select: none;
+}
+
+th[sortable] {
+  @extend .sortable;
 }
 
 th[sortable].asc:before,
@@ -49,4 +53,8 @@ th[sortable].desc:before {
 
 .faded {
   opacity: 0.3;
+}
+
+.results {
+  background-color: #c6c8ca60;
 }

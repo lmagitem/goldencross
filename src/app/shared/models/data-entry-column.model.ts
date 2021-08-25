@@ -5,4 +5,5 @@ export interface DataEntryColumn {
   index: number;
   name: string;
   type: CrossingType;
+  visible: boolean;
 }

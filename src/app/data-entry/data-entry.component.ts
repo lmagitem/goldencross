@@ -113,6 +113,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
         index: 0,
         name: PriceUtils.getCrossingWithClass(type) + ' n°1',
         type,
+        visible: true,
       });
 
       // Then check in each period of each stock...
@@ -130,6 +131,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
                 index: columnsForThisType.length,
                 name: PriceUtils.getCrossingWithClass(type) + ' n°' + (i + 1),
                 type,
+                visible: true,
               });
             }
           }
@@ -195,8 +197,13 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     return (Math.round(n * 100) / 100).toFixed(2);
   }
 
+  /** Sets the visibility of all columns to true. */
+  public showColumns() {
+    this.dataEntryColumns.forEach((c) => (c.visible = true));
+  }
+
   /** When the button to enable logging is clicked, enable/disable logging for that part of the app. */
-  switchLogging() {
+  public switchLogging() {
     this.analysisLog = !this.analysisLog;
     this.loggingService.enableLog(LogType.ANALYSIS_PROCESS, this.analysisLog);
   }
