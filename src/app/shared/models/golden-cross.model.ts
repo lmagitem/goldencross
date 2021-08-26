@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
-import { CrossingType } from '../enums/crossing-type.enum';
 import { Timescale } from '../enums/timescale.enum';
 import { PriceUtils } from '../utils/price.utils';
+import { CrossingType } from './crossing-type.model';
 
 /** When and at which price a golden cross happened. */
 export class GoldenCross {

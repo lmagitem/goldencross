@@ -1,4 +1,4 @@
-import { CrossingType } from '../enums/crossing-type.enum';
+import { CrossingType } from './crossing-type.model';
 
 /** A rule allowing to decide if we want to buy or not. */
 export interface Rule {

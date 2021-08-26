@@ -1,5 +1,5 @@
-import { CrossingType } from '../enums/crossing-type.enum';
 import { AnalysisResults } from '../models/analysis-results.model';
+import { CrossingType } from '../models/crossing-type.model';
 import { GoldenCross } from '../models/golden-cross.model';
 import { AnalysedPeriod } from '../models/period.model';
 import { Rule } from '../models/rule.model';
@@ -37,7 +37,14 @@ export class CalculatorUtils {
         if (!found && rule.turnsAllowed.includes(turn)) {
           // Then checks in all the data from the period, and keeps the crossings allowed by the rule
           for (const crossing of period.crossings) {
-            if (!found && rule.typesAllowed.includes(crossing.type)) {
+            if (
+              !found &&
+              rule.typesAllowed.findIndex(
+                (t) =>
+                  crossing.type.firstMA === t.firstMA &&
+                  crossing.type.intoMA === t.intoMA
+              ) !== -1
+            ) {
               // Finally, uses the entry if it happened after the last one used
               if (
                 lastBuy === undefined ||

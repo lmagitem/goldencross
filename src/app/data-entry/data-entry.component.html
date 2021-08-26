@@ -1,72 +1,53 @@
-<div class="card text-white bg-secondary">
-  <div class="card-body">
-    <div class="card-title">
-      <h5 class="d-inline">Input table</h5>
-      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-      <p class="d-inline">Where we enter the data to be processed.</p>
-      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-      <a class="d-inline btn btn-info" role="button" (click)="showColumns()"
-        >👁</a
-      >
-      <span>&nbsp;&nbsp;&nbsp;</span>
-      <a class="d-inline btn btn-info" role="button" (click)="switchLogging()"
-        >Analysis logs {{ analysisLog ? "on" : "off" }}</a
-      >
-    </div>
-    <div class="card-text overflow-auto">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th scope="col" sortable="name" (sort)="onSort($event)">Name</th>
-            <th scope="col" sortable="sector" (sort)="onSort($event)">
-              Sector
-            </th>
-            <th scope="col">Period</th>
-            <th scope="col">Prev. high</th>
-            <th
-              scope="col"
-              *ngFor="let column of dataEntryColumns"
-              class="sortable"
-              [class.d-none]="!column.visible"
-              [innerHTML]="column.name"
-              (click)="column.visible = !column.visible"
-            ></th>
-            <th scope="col">Lowest</th>
-            <th scope="col">+6M Price</th>
-            <th scope="col">+2Y Price</th>
-            <th scope="col" *ngFor="let column of rulesetColumns">
-              {{ column.ruleset.name }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <ng-container *ngFor="let stock of sortedStocks">
-            <tr *ngFor="let period of stock.periods; let periodIndex = index">
-              <th scope="row" [class.faded]="periodIndex !== 0">
-                {{ stock.name }}
-              </th>
-              <td [class.faded]="periodIndex !== 0">
-                {{ stock.sector }}
-              </td>
-              <td>{{ period.name }}</td>
-              <td>{{ formatToTwoDigits(period.previousHigh) }}</td>
-              <td
-                *ngFor="let column of dataEntryColumns"
-                [class.d-none]="!column.visible"
-                [innerHTML]="getCrossing(column.index, column.type, period)"
-              ></td>
-              <td>{{ formatToTwoDigits(period.lowest) }}</td>
-              <td>{{ formatToTwoDigits(period.priceSixMonths) }}</td>
-              <td>{{ formatToTwoDigits(period.priceTwoYears) }}</td>
-              <td
-                *ngFor="let column of rulesetColumns"
-                class="results"
-                [innerHTML]="getAnalysisResults(stock, period, column.ruleset)"
-              ></td>
-            </tr>
-          </ng-container>
-        </tbody>
-      </table>
-    </div>
-  </div>
+<div class="overflow-auto">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col" sortable="name" (sort)="onSort($event)">Name</th>
+        <th scope="col" sortable="sector" (sort)="onSort($event)">Sector</th>
+        <th scope="col">Period</th>
+        <th scope="col">Prev. high</th>
+        <th
+          scope="col"
+          *ngFor="let column of dataEntryColumns"
+          class="sortable"
+          [class.d-none]="!column.visible"
+          [innerHTML]="column.name"
+          (click)="column.visible = !column.visible"
+        ></th>
+        <th scope="col">Lowest</th>
+        <th scope="col">+6M Price</th>
+        <th scope="col">+2Y Price</th>
+        <th scope="col" *ngFor="let column of rulesetColumns">
+          {{ column.ruleset.name }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let stock of sortedStocks">
+        <tr *ngFor="let period of stock.periods; let periodIndex = index">
+          <th scope="row" [class.faded]="periodIndex !== 0">
+            {{ stock.name }}
+          </th>
+          <td [class.faded]="periodIndex !== 0">
+            {{ stock.sector }}
+          </td>
+          <td>{{ period.name }}</td>
+          <td>{{ formatToTwoDigits(period.previousHigh) }}</td>
+          <td
+            *ngFor="let column of dataEntryColumns"
+            [class.d-none]="!column.visible"
+            [innerHTML]="getCrossing(column.index, column.type, period)"
+          ></td>
+          <td>{{ formatToTwoDigits(period.lowest) }}</td>
+          <td>{{ formatToTwoDigits(period.priceSixMonths) }}</td>
+          <td>{{ formatToTwoDigits(period.priceTwoYears) }}</td>
+          <td
+            *ngFor="let column of rulesetColumns"
+            class="results"
+            [innerHTML]="getAnalysisResults(stock, period, column.ruleset)"
+          ></td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
 </div>

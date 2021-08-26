@@ -12,10 +12,6 @@ import { Stock } from '../shared/models/stock.model';
 import * as _ from 'lodash';
 import { SortColumn, SortDirection } from '../shared/enums/sort-direction.enum';
 import { DataEntryColumn } from '../shared/models/data-entry-column.model';
-import {
-  CrossingType,
-  crossingTypeList,
-} from '../shared/enums/crossing-type.enum';
 import { GoldenCross } from '../shared/models/golden-cross.model';
 import { AnalysedPeriod } from '../shared/models/period.model';
 import { ObjectUtils } from '../shared/utils/object.utils';
@@ -23,12 +19,9 @@ import { PriceUtils } from '../shared/utils/price.utils';
 import { Ruleset } from '../shared/models/ruleset.model';
 import { RulesetColumn } from '../shared/models/ruleset-column.model';
 import { CalculatorUtils } from '../shared/utils/calculator.utils';
-import {
-  initialLoggingStatus,
-  LoggingService,
-} from '../shared/services/logging.service';
+import { LoggingService } from '../shared/services/logging.service';
 import { LogType } from '../shared/services/log-type.enum';
-import { AnalysisResults } from '../shared/models/analysis-results.model';
+import { CrossingType } from '../shared/models/crossing-type.model';
 
 /** Displays a table used to enter and look at data. */
 @Component({
@@ -39,6 +32,8 @@ import { AnalysisResults } from '../shared/models/analysis-results.model';
 export class DataEntryComponent implements OnInit, OnDestroy {
   /** Subscription management. */
   private subs: SubSink = new SubSink();
+  /** The list of managed crossing types. */
+  crossingTypeList: CrossingType[] = [];
   /** The list of dynamically generated columns. */
   dataEntryColumns: Array<DataEntryColumn> = [];
   /** The list of dynamically generated columns. */
@@ -47,10 +42,6 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   stocks: Array<Stock> = [];
   /** The sorted entries in the table. */
   sortedStocks: Array<Stock> = [];
-  /** Is logging enabled for the analysis process? */
-  analysisLog =
-    initialLoggingStatus.find((o) => o.type === LogType.ANALYSIS_PROCESS)
-      ?.enabled || false;
   /** The list of sortable headers. */
   @ViewChildren(SortableHeader) headers: QueryList<SortableHeader> | undefined;
 
@@ -68,6 +59,15 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     });
     this.subs.sink = this.calculatorService.rulesets$.subscribe((sets) => {
       this.generateRulesetColumns(sets);
+    });
+    this.subs.sink = this.calculatorService.crossingTypeList$.subscribe(
+      (list) => {
+        this.crossingTypeList = list;
+        this.generateDataEntryColumns(this.stocks);
+      }
+    );
+    this.subs.sink = this.calculatorService.showColumnsAction$.subscribe(() => {
+      this.showColumns();
     });
   }
 
@@ -106,7 +106,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   /** Generates columns for each type of crossing that appear in the rows. */
   generateDataEntryColumns(rows: Stock[]) {
     this.dataEntryColumns = [];
-    crossingTypeList.forEach((type: CrossingType) => {
+    this.crossingTypeList.forEach((type: CrossingType) => {
       // For each type, add a first column
       const columnsForThisType: DataEntryColumn[] = [];
       columnsForThisType.push({
@@ -121,7 +121,11 @@ export class DataEntryComponent implements OnInit, OnDestroy {
         stock.periods?.forEach((period) => {
           for (
             let i = 0;
-            i < period.crossings.filter((c) => c.type === type).length;
+            i <
+            period.crossings.filter(
+              (c) =>
+                c.type.firstMA === type.firstMA && c.type.intoMA === type.intoMA
+            ).length;
             i++
           ) {
             // ... if they have more than X entries (X being the current count) for that type
@@ -156,7 +160,9 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   ): string {
     // Find the crossings corresponding to the given type and sort them
     const crossings = period.crossings
-      .filter((c) => c.type === type)
+      .filter(
+        (c) => c.type.firstMA === type.firstMA && c.type.intoMA === type.intoMA
+      )
       .sort(
         (a, b) =>
           new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
@@ -200,11 +206,5 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   /** Sets the visibility of all columns to true. */
   public showColumns() {
     this.dataEntryColumns.forEach((c) => (c.visible = true));
-  }
-
-  /** When the button to enable logging is clicked, enable/disable logging for that part of the app. */
-  public switchLogging() {
-    this.analysisLog = !this.analysisLog;
-    this.loggingService.enableLog(LogType.ANALYSIS_PROCESS, this.analysisLog);
   }
 }

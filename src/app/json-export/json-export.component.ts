@@ -4,10 +4,7 @@ import { CalculatorService } from '../calculator/calculator.service';
 import { Ruleset } from '../shared/models/ruleset.model';
 import { Stock } from '../shared/models/stock.model';
 import { LogType } from '../shared/services/log-type.enum';
-import {
-  initialLoggingStatus,
-  LoggingService,
-} from '../shared/services/logging.service';
+import { LoggingService } from '../shared/services/logging.service';
 
 /** A text field in which one can put or retreive the dataset used by the app. */
 @Component({
@@ -24,10 +21,6 @@ export class JsonExportComponent implements OnInit, OnDestroy {
   private rulesets: Array<Ruleset> = [];
   /** The json to display. */
   jsonContent = '{}';
-  /** Is logging enabled for Json Parsing? */
-  jsonLog =
-    initialLoggingStatus.find((o) => o.type === LogType.JSON_PARSING)
-      ?.enabled || false;
 
   constructor(
     private calculatorService: CalculatorService,
@@ -85,11 +78,5 @@ export class JsonExportComponent implements OnInit, OnDestroy {
     ) {
       this.calculatorService.updateData(json);
     }
-  }
-
-  /** When the button to enable logging is clicked, enable/disable logging for that part of the app. */
-  switchLogging() {
-    this.jsonLog = !this.jsonLog;
-    this.loggingService.enableLog(LogType.JSON_PARSING, this.jsonLog);
   }
 }

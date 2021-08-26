@@ -1,11 +1,72 @@
 <div class="container w-100 mw-100 p-5">
   <div class="row m-2">
-    <div class="col-sm-12 left"><app-data-entry></app-data-entry></div>
-    <!-- <div class="col-sm-3 right">
-      <app-results-display></app-results-display>
-    </div>-->
-  </div>
-  <div class="row m-2 mt-4">
-    <div class="col-sm-12 down"><app-json-export></app-json-export></div>
+    <ngb-accordion
+      #acc="ngbAccordion"
+      class="w-100"
+      activeIds="ngb-panel-0, ngb-panel-2"
+    >
+      <ngb-panel>
+        <ng-template ngbPanelHeader>
+          <div class="d-flex justify-content-between">
+            <button ngbPanelToggle class="btn btn-link text-left pl-0">
+              <h5 class="d-inline">Input table</h5>
+              <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+              <p class="d-inline">Where we enter the data to be processed.</p>
+            </button>
+            <div class="m-2">
+              <a
+                class="d-inline btn btn-info m-2"
+                role="button"
+                (click)="showColumns()"
+                >👁</a
+              >
+              <a
+                class="d-inline btn btn-info m-2 analysis-width"
+                role="button"
+                (click)="switchLogging('proc')"
+                >Analysis logs {{ analysisLog ? "on" : "off" }}
+              </a>
+            </div>
+          </div>
+        </ng-template>
+        <ng-template ngbPanelContent
+          ><app-data-entry></app-data-entry>
+        </ng-template>
+      </ngb-panel>
+      <ngb-panel>
+        <ng-template ngbPanelTitle>
+          <h5 class="d-inline">Results</h5>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <p class="d-inline">Where we display the results of our analysis.</p>
+        </ng-template>
+        <ng-template ngbPanelContent>
+          <app-results-display></app-results-display
+        ></ng-template>
+      </ngb-panel>
+      <ngb-panel>
+        <ng-template ngbPanelHeader>
+          <div class="d-flex justify-content-between">
+            <button ngbPanelToggle class="btn btn-link text-left pl-0">
+              <h5 class="d-inline">Json data</h5>
+              <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+              <p class="d-inline">
+                Where we can put or retreive data in json format.
+              </p>
+            </button>
+            <div class="m-2">
+              <a
+                class="d-inline btn btn-info m-2 json-width"
+                role="button"
+                (click)="switchLogging('json')"
+                >Json logs {{ jsonLog ? "on" : "off" }}
+              </a>
+            </div>
+          </div>
+        </ng-template>
+        <ng-template ngbPanelContent>
+          <app-json-export></app-json-export>
+        </ng-template>
+      </ngb-panel>
+    </ngb-accordion>
   </div>
 </div>
