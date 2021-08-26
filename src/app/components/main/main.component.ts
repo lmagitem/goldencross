@@ -5,6 +5,7 @@ import {
   initialLoggingStatus,
   LoggingService,
 } from 'src/app/services/logging.service';
+import { StorageService } from 'src/app/services/storage.service';
 
 @Component({
   selector: 'app-main',
@@ -31,6 +32,11 @@ export class MainComponent implements OnInit {
   /** Sets the visibility of all columns to true. */
   public showColumns() {
     this.dataService.showColumns();
+  }
+
+  /** Erases the app's data from the user local storage. */
+  public clearLocalStorage() {
+    this.dataService.clearLocalStorage();
   }
 
   /** When the button to enable logging is clicked, enable/disable logging. */

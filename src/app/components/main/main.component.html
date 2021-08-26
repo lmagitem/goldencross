@@ -55,6 +55,12 @@
             </button>
             <div class="m-2">
               <a
+                class="d-inline btn btn-info m-2 analysis-width"
+                role="button"
+                (click)="clearLocalStorage()"
+                >Clear local storage
+              </a>
+              <a
                 class="d-inline btn btn-info m-2 json-width"
                 role="button"
                 (click)="switchLogging('json')"

@@ -119,6 +119,13 @@ export class DataService {
     }
   }
 
+  /** Erases the app's data from the user local storage. */
+  public clearLocalStorage() {
+    this.storageService.removeSavedState('goldencross_crossingTypeList');
+    this.storageService.removeSavedState('goldencross_rows');
+    this.storageService.removeSavedState('goldencross_rulesets');
+  }
+
   /** Emits true to show hidden columns on the data entry table. */
   public showColumns() {
     this.showColumnsAction.next(true);
