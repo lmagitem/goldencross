@@ -21,6 +21,8 @@ export class MainComponent implements OnInit {
   analysisLog =
     initialLoggingStatus.find((o) => o.type === LogType.ANALYSIS_PROCESS)
       ?.enabled || false;
+  /** Can the user see the advanced buttons? */
+  advancedButtonsEnabled = false;
 
   constructor(
     private dataService: DataService,
