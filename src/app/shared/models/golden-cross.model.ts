@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
 import { Timescale } from '../enums/timescale.enum';
-import { PriceUtils } from '../utils/price.utils';
 import { CrossingType } from './crossing-type.model';
 
 /** When and at which price a golden cross happened. */
@@ -46,17 +45,5 @@ export class GoldenCross {
           JSON.stringify(obj)
       );
     }
-  }
-
-  /** Returns a displayable version of the contained data. */
-  public toHTML(getPriceAppreciationScore = (n: number) => 0): string {
-    return (
-      '<span class="' +
-      PriceUtils.getPriceClass(getPriceAppreciationScore(this.price)) +
-      '">' +
-      (Math.round(this.price * 100) / 100).toFixed(2) +
-      '</span><br>' +
-      PriceUtils.getPriceTimestamp(this.timestamp, this.timescale)
-    );
   }
 }

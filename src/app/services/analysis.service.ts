@@ -1,18 +1,22 @@
-import { AnalysisResults } from '../models/analysis-results.model';
-import { CrossingType } from '../models/crossing-type.model';
-import { GoldenCross } from '../models/golden-cross.model';
-import { AnalysedPeriod } from '../models/period.model';
-import { Rule } from '../models/rule.model';
-import { Ruleset } from '../models/ruleset.model';
-import { Stock } from '../models/stock.model';
-import { MathUtils } from './math.utils';
-import { StringUtils } from './string.utils';
+import { Injectable } from '@angular/core';
+import { AnalysisResults } from '../shared/models/analysis-results.model';
+import { CrossingType } from '../shared/models/crossing-type.model';
+import { GoldenCross } from '../shared/models/golden-cross.model';
+import { AnalysedPeriod } from '../shared/models/period.model';
+import { Rule } from '../shared/models/rule.model';
+import { Ruleset } from '../shared/models/ruleset.model';
+import { Stock } from '../shared/models/stock.model';
+import { MathUtils } from '../shared/utils/math.utils';
+import { StringUtils } from '../shared/utils/string.utils';
 
-/** Helper functions for the analysis process. */
-export class CalculatorUtils {
+/** Provides functions to analyse and process price movements. */
+@Injectable({
+  providedIn: 'root',
+})
+export class AnalysisService {
   /** After being fed the necessary data, executes the buy strategy represented by the given ruleset.
    *  @description Usable keywords for the formula are: "avg", "last-used", "last-of-type", "curr", "prev-high" */
-  public static processDataWithRuleset(
+  public processDataWithRuleset(
     stock: Stock,
     period: AnalysedPeriod,
     ruleset: Ruleset
@@ -52,7 +56,7 @@ export class CalculatorUtils {
               ) {
                 // Prepare the formula and dynamically calculate its result
                 const result = MathUtils.evaluateOrZero(
-                  CalculatorUtils.getFormula(
+                  this.getFormula(
                     rule,
                     costAverage,
                     previousHigh,
@@ -112,7 +116,7 @@ export class CalculatorUtils {
   }
 
   /** Prepares the formula by replacing the keywords with actual numbers. */
-  private static getFormula(
+  private getFormula(
     rule: Rule,
     costAverage: number,
     previousHigh: number,

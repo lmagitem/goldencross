@@ -3,13 +3,13 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { DataEntryComponent } from './data-entry/data-entry.component';
-import { ResultsDisplayComponent } from './results-display/results-display.component';
-import { JsonExportComponent } from './json-export/json-export.component';
-import { CalculatorComponent } from './calculator/calculator.component';
+import { DataEntryComponent } from './components/data-entry/data-entry.component';
+import { MainComponent } from './components/main/main.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SortableHeader } from './shared/directives/sortable-header.directive';
+import { JsonExportComponent } from './components/json-export/json-export.component';
+import { ResultsDisplayComponent } from './components/results-display/results-display.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +17,7 @@ import { SortableHeader } from './shared/directives/sortable-header.directive';
     DataEntryComponent,
     ResultsDisplayComponent,
     JsonExportComponent,
-    CalculatorComponent,
+    MainComponent,
     SortableHeader,
   ],
   imports: [

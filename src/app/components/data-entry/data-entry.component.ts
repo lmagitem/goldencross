@@ -6,22 +6,25 @@ import {
   ViewChildren,
 } from '@angular/core';
 import { SubSink } from 'subsink';
-import { CalculatorService } from '../calculator/calculator.service';
-import { SortableHeader } from '../shared/directives/sortable-header.directive';
-import { Stock } from '../shared/models/stock.model';
+import { SortableHeader } from '../../shared/directives/sortable-header.directive';
+import { Stock } from '../../shared/models/stock.model';
 import * as _ from 'lodash';
-import { SortColumn, SortDirection } from '../shared/enums/sort-direction.enum';
-import { DataEntryColumn } from '../shared/models/data-entry-column.model';
-import { GoldenCross } from '../shared/models/golden-cross.model';
-import { AnalysedPeriod } from '../shared/models/period.model';
-import { ObjectUtils } from '../shared/utils/object.utils';
-import { PriceUtils } from '../shared/utils/price.utils';
-import { Ruleset } from '../shared/models/ruleset.model';
-import { RulesetColumn } from '../shared/models/ruleset-column.model';
-import { CalculatorUtils } from '../shared/utils/calculator.utils';
-import { LoggingService } from '../shared/services/logging.service';
-import { LogType } from '../shared/services/log-type.enum';
-import { CrossingType } from '../shared/models/crossing-type.model';
+import {
+  SortColumn,
+  SortDirection,
+} from '../../shared/enums/sort-direction.enum';
+import { DataEntryColumn } from '../../shared/models/data-entry-column.model';
+import { GoldenCross } from '../../shared/models/golden-cross.model';
+import { AnalysedPeriod } from '../../shared/models/period.model';
+import { ObjectUtils } from '../../shared/utils/object.utils';
+import { Ruleset } from '../../shared/models/ruleset.model';
+import { RulesetColumn } from '../../shared/models/ruleset-column.model';
+import { LogType } from '../../shared/enums/log-type.enum';
+import { CrossingType } from '../../shared/models/crossing-type.model';
+import { DataService } from 'src/app/services/data.service';
+import { PriceDisplayService } from 'src/app/services/price-display.service';
+import { LoggingService } from 'src/app/services/logging.service';
+import { AnalysisService } from 'src/app/services/analysis.service';
 
 /** Displays a table used to enter and look at data. */
 @Component({
@@ -46,27 +49,27 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   @ViewChildren(SortableHeader) headers: QueryList<SortableHeader> | undefined;
 
   constructor(
-    private calculatorService: CalculatorService,
+    private dataService: DataService,
+    private analysisService: AnalysisService,
+    private priceDisplayService: PriceDisplayService,
     private loggingService: LoggingService
   ) {}
 
   /** Listens for the list of rows and rules coming from the json export service. */
   ngOnInit(): void {
-    this.subs.sink = this.calculatorService.rows$.subscribe((rows) => {
+    this.subs.sink = this.dataService.rows$.subscribe((rows) => {
       this.generateDataEntryColumns(rows);
       this.stocks = rows;
       this.sortedStocks = rows;
     });
-    this.subs.sink = this.calculatorService.rulesets$.subscribe((sets) => {
+    this.subs.sink = this.dataService.rulesets$.subscribe((sets) => {
       this.generateRulesetColumns(sets);
     });
-    this.subs.sink = this.calculatorService.crossingTypeList$.subscribe(
-      (list) => {
-        this.crossingTypeList = list;
-        this.generateDataEntryColumns(this.stocks);
-      }
-    );
-    this.subs.sink = this.calculatorService.showColumnsAction$.subscribe(() => {
+    this.subs.sink = this.dataService.crossingTypeList$.subscribe((list) => {
+      this.crossingTypeList = list;
+      this.generateDataEntryColumns(this.stocks);
+    });
+    this.subs.sink = this.dataService.showColumnsAction$.subscribe(() => {
       this.showColumns();
     });
   }
@@ -111,7 +114,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
       const columnsForThisType: DataEntryColumn[] = [];
       columnsForThisType.push({
         index: 0,
-        name: PriceUtils.getCrossingWithClass(type) + ' n°1',
+        name: this.priceDisplayService.getCrossingWithClass(type) + ' n°1',
         type,
         visible: true,
       });
@@ -133,7 +136,10 @@ export class DataEntryComponent implements OnInit, OnDestroy {
               // And add columns accordingly
               columnsForThisType.push({
                 index: columnsForThisType.length,
-                name: PriceUtils.getCrossingWithClass(type) + ' n°' + (i + 1),
+                name:
+                  this.priceDisplayService.getCrossingWithClass(type) +
+                  ' n°' +
+                  (i + 1),
                 type,
                 visible: true,
               });
@@ -170,13 +176,15 @@ export class DataEntryComponent implements OnInit, OnDestroy {
 
     // Then if there are indeed some to display, get the one corresponding to the required column
     if (crossings.length > index) {
-      return GoldenCross.getInstance(crossings[index]).toHTML((n: number) =>
-        PriceUtils.getPriceAppreciation(
-          n,
-          (period.priceSixMonths + period.priceTwoYears) / 2,
-          period.previousHigh,
-          period.lowest
-        )
+      return this.priceDisplayService.getGoldenCrossWithClass(
+        GoldenCross.getInstance(crossings[index]),
+        (n: number) =>
+          this.priceDisplayService.getPriceAppreciation(
+            n,
+            (period.priceSixMonths + period.priceTwoYears) / 2,
+            period.previousHigh,
+            period.lowest
+          )
       );
     }
 
@@ -189,13 +197,13 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     period: AnalysedPeriod,
     ruleset: Ruleset
   ): string {
-    const results = CalculatorUtils.processDataWithRuleset(
+    const results = this.analysisService.processDataWithRuleset(
       stock,
       period,
       ruleset
     );
     this.loggingService.log(LogType.ANALYSIS_PROCESS, results.log);
-    return PriceUtils.getAnalysisResultsWithClass(results);
+    return this.priceDisplayService.getAnalysisResultsWithClass(results);
   }
 
   /** Format number to two digits for display in the table. */

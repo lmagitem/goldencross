@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { LogType } from './log-type.enum';
+import { LogType } from '../shared/enums/log-type.enum';
 
 /** Simple interface to remember what to log. */
 interface EnabledByType {

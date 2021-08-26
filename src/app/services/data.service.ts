@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { cross } from 'mathjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import {
   CrossingType,
@@ -8,14 +7,14 @@ import {
 import { Export } from '../shared/models/export.model';
 import { Ruleset } from '../shared/models/ruleset.model';
 import { Stock } from '../shared/models/stock.model';
-import { LogType } from '../shared/services/log-type.enum';
-import { LoggingService } from '../shared/services/logging.service';
+import { LogType } from '../shared/enums/log-type.enum';
+import { LoggingService } from './logging.service';
 
-/** Calculates the analysis results and manages the necessary data. */
+/** Manages the app data. */
 @Injectable({
   providedIn: 'root',
 })
-export class CalculatorService {
+export class DataService {
   /** The crossing types to manage for this session. */
   private crossingTypeList = new BehaviorSubject<CrossingType[]>([
     ...initialCrossingTypes,
@@ -44,7 +43,7 @@ export class CalculatorService {
 
       this.loggingService.log(
         LogType.JSON_PARSING,
-        'CalculatorService > updateData() - Just received the following:',
+        'dataService > updateData() - Just received the following:',
         data
       );
 

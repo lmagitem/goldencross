@@ -1,17 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { LogType } from '../shared/services/log-type.enum';
+import { LogType } from '../../shared/enums/log-type.enum';
+import { DataService } from '../../services/data.service';
 import {
   initialLoggingStatus,
   LoggingService,
-} from '../shared/services/logging.service';
-import { CalculatorService } from './calculator.service';
+} from 'src/app/services/logging.service';
 
 @Component({
-  selector: 'app-calculator',
-  templateUrl: './calculator.component.html',
-  styleUrls: ['./calculator.component.scss'],
+  selector: 'app-main',
+  templateUrl: './main.component.html',
+  styleUrls: ['./main.component.scss'],
 })
-export class CalculatorComponent implements OnInit {
+export class MainComponent implements OnInit {
   /** Is logging enabled for Json Parsing? */
   jsonLog =
     initialLoggingStatus.find((o) => o.type === LogType.JSON_PARSING)
@@ -22,7 +22,7 @@ export class CalculatorComponent implements OnInit {
       ?.enabled || false;
 
   constructor(
-    private calculatorService: CalculatorService,
+    private dataService: DataService,
     private loggingService: LoggingService
   ) {}
 
@@ -30,7 +30,7 @@ export class CalculatorComponent implements OnInit {
 
   /** Sets the visibility of all columns to true. */
   public showColumns() {
-    this.calculatorService.showColumns();
+    this.dataService.showColumns();
   }
 
   /** When the button to enable logging is clicked, enable/disable logging. */
