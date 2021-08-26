@@ -2,13 +2,34 @@
   <table class="table table-striped">
     <thead>
       <tr>
-        <th scope="col" sortable="name" (sort)="onSort($event)">Name</th>
-        <th scope="col" sortable="sector" (sort)="onSort($event)">Sector</th>
+        <th
+          scope="col"
+          sortable="name"
+          (sort)="onSort($event)"
+          placement="top"
+          ngbTooltip="Click here to sort by name"
+          container="body"
+        >
+          Name
+        </th>
+        <th
+          scope="col"
+          sortable="sector"
+          (sort)="onSort($event)"
+          placement="top"
+          ngbTooltip="Click here to sort by sector"
+          container="body"
+        >
+          Sector
+        </th>
         <th scope="col">Period</th>
         <th scope="col">Prev. high</th>
         <th
-          scope="col"
           *ngFor="let column of dataEntryColumns"
+          scope="col"
+          placement="top"
+          ngbTooltip="Click here to hide that column"
+          container="body"
           class="sortable"
           [class.d-none]="!column.visible"
           [innerHTML]="column.name"
