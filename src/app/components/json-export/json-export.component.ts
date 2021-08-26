@@ -5,6 +5,8 @@ import { Stock } from 'src/app/shared/models/stock.model';
 import { LogType } from 'src/app/shared/enums/log-type.enum';
 import { SubSink } from 'subsink';
 import { LoggingService } from 'src/app/services/logging.service';
+import { delay, map } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
 
 /** A text field in which one can put or retreive the dataset used by the app. */
 @Component({
@@ -20,7 +22,7 @@ export class JsonExportComponent implements OnInit, OnDestroy {
   /** A copy of the data found in dataService, used to prepare the json to display. */
   private rulesets: Array<Ruleset> = [];
   /** The json to display. */
-  jsonContent = '{}';
+  jsonContent = '';
 
   constructor(
     private dataService: DataService,
@@ -29,14 +31,19 @@ export class JsonExportComponent implements OnInit, OnDestroy {
 
   /** When the data changes, make a local copy and update the json to display. */
   ngOnInit(): void {
-    this.subs.sink = this.dataService.rows$.subscribe((stocks) => {
-      this.stocks = stocks;
-      this.updateContent();
-    });
-    this.subs.sink = this.dataService.rulesets$.subscribe((rulesets) => {
-      this.rulesets = rulesets;
-      this.updateContent();
-    });
+    this.dataService.restoreState();
+
+    this.subs.sink = combineLatest([
+      this.dataService.rows$,
+      this.dataService.rulesets$,
+    ])
+      .pipe(map((results) => ({ rows: results[0], rulesets: results[1] })))
+      .pipe(delay(150))
+      .subscribe((results: { rows: any; rulesets: any }) => {
+        this.stocks = results.rows;
+        this.rulesets = results.rulesets;
+        this.updateContent();
+      });
   }
 
   /** Unsubscribe to avoid memory loss. */

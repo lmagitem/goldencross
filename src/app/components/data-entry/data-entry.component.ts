@@ -25,6 +25,8 @@ import { DataService } from 'src/app/services/data.service';
 import { PriceDisplayService } from 'src/app/services/price-display.service';
 import { LoggingService } from 'src/app/services/logging.service';
 import { AnalysisService } from 'src/app/services/analysis.service';
+import { delay, map } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
 
 /** Displays a table used to enter and look at data. */
 @Component({
@@ -57,18 +59,23 @@ export class DataEntryComponent implements OnInit, OnDestroy {
 
   /** Listens for the list of rows and rules coming from the json export service. */
   ngOnInit(): void {
-    this.subs.sink = this.dataService.rows$.subscribe((rows) => {
-      this.generateDataEntryColumns(rows);
-      this.stocks = rows;
-      this.sortedStocks = rows;
-    });
-    this.subs.sink = this.dataService.rulesets$.subscribe((sets) => {
-      this.generateRulesetColumns(sets);
-    });
-    this.subs.sink = this.dataService.crossingTypeList$.subscribe((list) => {
-      this.crossingTypeList = list;
-      this.generateDataEntryColumns(this.stocks);
-    });
+    this.subs.sink = combineLatest([
+      this.dataService.rows$,
+      this.dataService.crossingTypeList$,
+    ])
+      .pipe(map((results) => ({ rows: results[0], list: results[1] })))
+      .pipe(delay(150))
+      .subscribe((results: { rows: any; list: any }) => {
+        this.crossingTypeList = results.list;
+        this.stocks = results.rows;
+        this.sortedStocks = results.rows;
+        this.generateDataEntryColumns(results.rows);
+      });
+    this.subs.sink = this.dataService.rulesets$
+      .pipe(delay(150))
+      .subscribe((sets) => {
+        this.generateRulesetColumns(sets);
+      });
     this.subs.sink = this.dataService.showColumnsAction$.subscribe(() => {
       this.showColumns();
     });

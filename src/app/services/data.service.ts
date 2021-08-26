@@ -9,6 +9,7 @@ import { Ruleset } from '../shared/models/ruleset.model';
 import { Stock } from '../shared/models/stock.model';
 import { LogType } from '../shared/enums/log-type.enum';
 import { LoggingService } from './logging.service';
+import { StorageService } from './storage.service';
 
 /** Manages the app data. */
 @Injectable({
@@ -34,7 +35,10 @@ export class DataService {
   /** Emits true each time the user clicks on the button "Show columns". */
   public showColumnsAction$ = this.showColumnsAction.asObservable();
 
-  constructor(private loggingService: LoggingService) {}
+  constructor(
+    private storageService: StorageService,
+    private loggingService: LoggingService
+  ) {}
 
   /** Updates the data entry table and the rulesets for result display using the json passed in parameter. */
   public updateData(json: string): void {
@@ -48,9 +52,10 @@ export class DataService {
       );
 
       this.updateCrossingTypeList(data);
-
       this.rows.next(data.stocks);
       this.rulesets.next(data.rulesets);
+
+      this.saveState();
     }
   }
 
@@ -78,6 +83,40 @@ export class DataService {
       a.firstMA === b.firstMA ? a.intoMA - b.intoMA : a.firstMA - b.firstMA
     );
     this.crossingTypeList.next(newCrossingTypeList);
+  }
+
+  /** Stores the current state of the app in the user's browser. */
+  public saveState() {
+    this.storageService.setSavedState(
+      this.crossingTypeList.getValue(),
+      'goldencross_crossingTypeList'
+    );
+    this.storageService.setSavedState(this.rows.getValue(), 'goldencross_rows');
+    this.storageService.setSavedState(
+      this.rulesets.getValue(),
+      'goldencross_rulesets'
+    );
+  }
+
+  /** Restores the state of the app from a previous session. */
+  public restoreState() {
+    const newCrossingTypeList = this.storageService.getSavedState(
+      'goldencross_crossingTypeList'
+    );
+    const newRows = this.storageService.getSavedState('goldencross_rows');
+    const newRulesets = this.storageService.getSavedState(
+      'goldencross_rulesets'
+    );
+
+    if (newCrossingTypeList !== undefined) {
+      this.crossingTypeList.next(newCrossingTypeList);
+    }
+    if (newRows !== undefined) {
+      this.rows.next(newRows);
+    }
+    if (newRulesets !== undefined) {
+      this.rulesets.next(newRulesets);
+    }
   }
 
   /** Emits true to show hidden columns on the data entry table. */
