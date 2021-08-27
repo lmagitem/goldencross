@@ -109,7 +109,7 @@ export class PriceDisplayService {
       this.getPriceClass(this.getGrowthScore(results.gainsAfterTwoYears)) +
       '">' +
       (results.gainsAfterTwoYears >= 0 ? '+' : '') +
-      results.gainsAfterTwoYears * 100 +
+      Math.round(results.gainsAfterTwoYears * 100) +
       '%</span><br><span class="smaller">avg: ' +
       results.costAverage +
       '<br>used: ' +

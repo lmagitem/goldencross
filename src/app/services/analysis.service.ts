@@ -34,10 +34,11 @@ export class AnalysisService {
       stock.name + ' > ' + period.name + ' > ' + ruleset.name + ' - Bought ';
 
     // Perform buying simulation
-    for (let turn = 1; turn <= ruleset.split; turn++) {
+    for (let turn = 1; turn <= ruleset.split.length; turn++) {
       found = false;
       // During each turn, checks each rule to see if it is applicable to this turn number
-      for (const rule of ruleset.rules) {
+      for (let r = 1; r <= ruleset.rules.length; r++) {
+        const rule = ruleset.rules[r - 1];
         if (!found && rule.turnsAllowed.includes(turn)) {
           // Then checks in all the data from the period, and keeps the crossings allowed by the rule
           for (const crossing of period.crossings) {
@@ -66,16 +67,21 @@ export class AnalysisService {
                   )
                 );
 
+                const currentSplit =
+                  (ruleset.split[turn - 1] * 100) /
+                  ruleset.split.reduce((a, b) => a + b, 0) /
+                  100;
+
                 // If the condition in the formula was met, saves everything and end the turn
                 if (result !== -1) {
                   costAverage =
                     Math.round(
                       (turn === 1
                         ? result
-                        : (costAverage * turn + result) / (turn + 1)) * 100
+                        : (costAverage * usedCapital + result * currentSplit) /
+                          (usedCapital + currentSplit)) * 100
                     ) / 100;
-                  usedCapital =
-                    usedCapital + Math.round((1 / ruleset.split) * 100) / 100;
+                  usedCapital = usedCapital + currentSplit;
 
                   lastOfTypes.set(crossing.type, result);
                   lastBuy = new Date(crossing.timestamp);
@@ -84,9 +90,12 @@ export class AnalysisService {
 
                   log +=
                     (turn !== 1 ? ', ' : '') +
-                    1 / ruleset.split +
-                    ' at ' +
-                    result;
+                    Math.round(currentSplit * 100) +
+                    '% at ' +
+                    result +
+                    ' (rule ' +
+                    r +
+                    ')';
                 }
               }
             }
