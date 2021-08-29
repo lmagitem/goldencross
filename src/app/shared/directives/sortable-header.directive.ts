@@ -18,7 +18,7 @@ const rotate: { [key: string]: SortDirection } = {
     '(click)': 'rotate()',
   },
 })
-export class SortableHeader {
+export class SortableHeaderDirective {
   /** The column that is sortable, used to know the field with which to sort. */
   @Input() sortable: SortColumn = '';
   /** The direction of the sorting (ascendent or descendent). */

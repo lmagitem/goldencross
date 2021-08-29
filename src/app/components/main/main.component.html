@@ -3,7 +3,7 @@
     <ngb-accordion
       #acc="ngbAccordion"
       class="w-100"
-      activeIds="ngb-panel-0, ngb-panel-2"
+      activeIds="ngb-panel-0, ngb-panel-3"
     >
       <ngb-panel>
         <ng-template ngbPanelHeader>
@@ -40,15 +40,37 @@
           ><app-data-entry></app-data-entry>
         </ng-template>
       </ngb-panel>
-      <ngb-panel>
-        <ng-template ngbPanelTitle>
-          <h5 class="d-inline">Results</h5>
-          <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-          <p class="d-inline">Where we display the results of our analysis.</p>
+      <ngb-panel
+        ><ng-template ngbPanelHeader>
+          <div class="d-flex justify-content-between">
+            <button ngbPanelToggle class="btn btn-link text-left pl-0">
+              <h5 class="d-inline">Results</h5>
+              <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+              <p class="d-inline">
+                Where we display the results of our analysis.
+              </p>
+            </button>
+          </div>
         </ng-template>
         <ng-template ngbPanelContent>
-          <app-results-display></app-results-display
-        ></ng-template>
+          <app-results-display></app-results-display>
+        </ng-template>
+      </ngb-panel>
+      <ngb-panel
+        ><ng-template ngbPanelHeader>
+          <div class="d-flex justify-content-between">
+            <button ngbPanelToggle class="btn btn-link text-left pl-0">
+              <h5 class="d-inline">Rules editor</h5>
+              <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+              <p class="d-inline">
+                Where we edit the rules to execute in the analysis.
+              </p>
+            </button>
+          </div>
+        </ng-template>
+        <ng-template ngbPanelContent>
+          <app-rule-editor></app-rule-editor>
+        </ng-template>
       </ngb-panel>
       <ngb-panel>
         <ng-template ngbPanelHeader>

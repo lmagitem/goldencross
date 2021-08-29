@@ -1,18 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { LogType } from '../../shared/enums/log-type.enum';
-import { DataService } from '../../services/data.service';
+import { DataService } from 'src/app/services/data/data.service';
 import {
   initialLoggingStatus,
   LoggingService,
-} from 'src/app/services/logging.service';
-import { StorageService } from 'src/app/services/storage.service';
+} from 'src/app/services/logging/logging.service';
+import { LogType } from '../../shared/enums/log-type.enum';
 
+/** The main page of the app where one can find all the features neatly stored into a beautiful accordion. */
 @Component({
   selector: 'app-main',
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.scss'],
 })
-export class MainComponent implements OnInit {
+export class MainComponent {
   /** Is logging enabled for Json Parsing? */
   jsonLog =
     initialLoggingStatus.find((o) => o.type === LogType.JSON_PARSING)
@@ -28,8 +28,6 @@ export class MainComponent implements OnInit {
     private dataService: DataService,
     private loggingService: LoggingService
   ) {}
-
-  ngOnInit(): void {}
 
   /** Sets the visibility of all columns to true. */
   public showColumns() {

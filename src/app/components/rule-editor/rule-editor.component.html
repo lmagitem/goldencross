@@ -1,0 +1,257 @@
+<ul class="nav-tabs nav">
+  <li class="nav-item" *ngFor="let ruleset of rulesetForms">
+    <a
+      class="nav-link"
+      [class.active]="ruleset === rulesetForm"
+      (click)="changeActiveRuleset(ruleset)"
+      >{{ ruleset.get("name")?.value }}
+      <span
+        class="close position-relative pl-2 font-weight-light"
+        (click)="removeRuleset(ruleset)"
+        >×</span
+      ></a
+    >
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" (click)="addRuleset()">+</a>
+  </li>
+</ul>
+<form [formGroup]="rulesetForm" class="px-3 py-0">
+  <div>
+    <div class="row">
+      <div class="col-sm-6 col-md-3 pt-3">
+        <div class="form-group col-sm-12">
+          <div class="row">
+            <label class="col-12 control-label" for="name"
+              >This ruleset's name:</label
+            >
+            <small class="col-12 form-text text-muted">
+              This name will be displayed as a column header in the table, and
+              used everywhere else to designate this specific set of rules.
+            </small>
+            <input
+              type="text"
+              id="name"
+              formControlName="name"
+              required="true"
+              placeholder="Name"
+              class="col-12 form-control"
+              [class.is-valid]="
+                rulesetForm.get('name')?.valid &&
+                (rulesetForm.get('name')?.dirty ||
+                  rulesetForm.get('name')?.touched)
+              "
+              [class.is-invalid]="
+                rulesetForm.get('name')?.invalid &&
+                (rulesetForm.get('name')?.dirty ||
+                  rulesetForm.get('name')?.touched)
+              "
+            />
+            <div
+              *ngIf="
+                rulesetForm.get('name')?.invalid &&
+                (rulesetForm.get('name')?.dirty ||
+                  rulesetForm.get('name')?.touched)
+              "
+              class="col-12 invalid-feedback"
+            >
+              Please enter a name for your ruleset.
+            </div>
+          </div>
+        </div>
+        <div class="form-group col-sm-12">
+          <div class="row">
+            <label class="col-12 control-label" for="currentSplit"
+              >Split your entry:</label
+            >
+            <small class="col-12 form-text text-muted">
+              How you want to divide your entry. For example, "1, 2, 4" would
+              mean that you'd allocate a certain amount for your first entry,
+              then twice that amount for the second entry and four time that
+              amount for the third entry.
+            </small>
+            <input
+              id="currentSplit"
+              type="text"
+              placeholder="Number"
+              class="col-10 form-control"
+              [class.is-valid]="currentSplit !== '' && isCurrentSplitValid()"
+              [class.is-invalid]="currentSplit !== '' && !isCurrentSplitValid()"
+              [value]="currentSplit"
+              (keyup)="updateCurrentSplit($event)"
+            />
+            <div class="col-2 pl-1">
+              <a class="btn btn-info" (click)="addSplit()">+</a>
+            </div>
+            <div
+              *ngIf="currentSplit !== '' && !isCurrentSplitValid()"
+              class="col-12 invalid-feedback"
+            >
+              Please enter an integer or a number with at most 2 decimals.
+            </div>
+
+            <shared-closable-tag
+              class="col-12 py-3"
+              [tags]="toTags(getSplits().controls, 'split')"
+              (change)="updateSplits($event)"
+            ></shared-closable-tag>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-9" style="padding-right: 3px">
+        <ul ngbNav #nav="ngbNav" class="nav-tabs">
+          <li
+            ngbNavItem
+            *ngFor="let rule of getRules().controls; let r = index"
+          >
+            <a
+              ngbNavLink
+              [class.active]="r === activeRule"
+              (click)="activeRule = r"
+              >{{ "Rule " + (r + 1) }}
+              <span
+                class="close position-relative pl-2 font-weight-light"
+                (click)="removeRule(r)"
+                >×</span
+              ></a
+            >
+            <ng-template ngbNavContent>
+              <div class="container pt-4">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <div class="row">
+                        <label class="col-12 control-label" for="currentSplit"
+                          >Turns allowed:</label
+                        >
+                        <small class="col-12 form-text text-muted">
+                          Your entry is divided by turns according to the number
+                          of entries you've set in the "Split" property of the
+                          ruleset. In this field you enter in which turns this
+                          rule is allowed to be executed?
+                        </small>
+                        <div class="col-11 pr-1">
+                          <select
+                            class="form-control"
+                            (change)="updateSelectedTurn($event)"
+                          >
+                            <option value="" disabled>Choose a turn</option>
+                            <option
+                              *ngFor="let turn of getNonAllocatedTurns(rule)"
+                              [ngValue]="turn"
+                            >
+                              {{ turn }}
+                            </option>
+                          </select>
+                        </div>
+                        <a class="col-1 btn btn-info" (click)="addTurn(rule)"
+                          >+</a
+                        >
+
+                        <shared-closable-tag
+                          class="col-12 py-3"
+                          [tags]="
+                            toTags(getAllowedTurns(rule).controls, 'turn')
+                          "
+                          (change)="updateAllowedTurns(rule, $event)"
+                        ></shared-closable-tag>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <div class="row">
+                        <label class="col-12 control-label" for="currentSplit"
+                          >Crossing types allowed:</label
+                        >
+                        <small class="col-12 form-text text-muted">
+                          At which types of crossings is this rule allowed to be
+                          executed?
+                        </small>
+                        <div class="col-5 mt-1">
+                          <label for="col-12 ma-from">From MA:</label
+                          ><input
+                            [value]="newCrossing.fromMA"
+                            id="ma-from"
+                            type="text"
+                            class="col-12 form-control"
+                            (input)="updateNewCrossing($event, 'from')"
+                          />
+                        </div>
+                        <div class="col-5 mt-1">
+                          <label for="col-12 ma-into">Into MA:</label>
+                          <input
+                            [value]="newCrossing.intoMA"
+                            id="ma-into"
+                            type="text"
+                            class="col-12 form-control"
+                            (input)="updateNewCrossing($event, 'into')"
+                          />
+                        </div>
+                        <div class="col-2">
+                          <div class="col-12" style="height: 2.3em"></div>
+                          <a class="col-12 btn btn-info" (click)="addType(rule)"
+                            >+</a
+                          >
+                        </div>
+
+                        <shared-closable-tag
+                          class="col-12 my-3"
+                          [tags]="
+                            toTags(getAllowedTypes(rule).controls, 'crossing')
+                          "
+                          (change)="updateAllowedTypes(rule, $event)"
+                        ></shared-closable-tag>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <hr class="col-xs-12" />
+                <div class="row">
+                  <div class="form-group">
+                    <label class="col-12 control-label" for="formula"
+                      >Formula:</label
+                    >
+                    <small class="col-12 form-text text-muted">
+                      The formula used to determine if this rule is to be
+                      executed. For exemple, "avg &gt; curr" mean that this rule
+                      would be a buy for this turn if the current price (curr)
+                      is lower than the cost average of your precedent entries.
+                    </small>
+                    <input
+                      [value]="getFormula(rule)"
+                      type="text"
+                      id="formula"
+                      class="col12 form-control"
+                      required="true"
+                      placeholder="avg > curr ? curr : -1"
+                      (input)="updateFormula(rule, $event)"
+                    />
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" (click)="addRule()">+</a>
+          </li>
+        </ul>
+        <div [ngbNavOutlet]="nav"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12">
+        <span class="pull-right">
+          <button
+            class="btn btn-info mr-2"
+            (click)="submit()"
+            [disabled]="rulesetForm.invalid"
+          >
+            Save
+          </button>
+          <button class="btn btn-info ml-2" (click)="cancel()">Cancel</button>
+        </span>
+      </div>
+    </div>
+  </div>
+</form>

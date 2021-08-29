@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Timescale } from '../shared/enums/timescale.enum';
-import { AnalysisResults } from '../shared/models/analysis-results.model';
-import { CrossingType } from '../shared/models/crossing-type.model';
-import { GoldenCross } from '../shared/models/golden-cross.model';
+import { Timescale } from '../../shared/enums/timescale.enum';
+import { AnalysisResults } from '../../shared/models/analysis-results.model';
+import { CrossingType } from '../../shared/models/crossing-type.model';
+import { GoldenCross } from '../../shared/models/golden-cross.model';
 
 /** Methods to manage how are prices displayed in the app. */
 @Injectable({
@@ -121,7 +121,7 @@ export class PriceDisplayService {
   /** Returns a string usable in html to display the crossings column headers with pretty colors. */
   public getCrossingWithClass(type: CrossingType): string {
     return (
-      this.getMAClass(type.firstMA, this.getMAScore(type.firstMA)) +
+      this.getMAClass(type.fromMA, this.getMAScore(type.fromMA)) +
       '↗️' +
       this.getMAClass(type.intoMA, this.getMAScore(type.intoMA))
     );

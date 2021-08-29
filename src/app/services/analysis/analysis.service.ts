@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
-import { AnalysisResults } from '../shared/models/analysis-results.model';
-import { CrossingType } from '../shared/models/crossing-type.model';
-import { GoldenCross } from '../shared/models/golden-cross.model';
-import { AnalysedPeriod } from '../shared/models/period.model';
-import { Rule } from '../shared/models/rule.model';
-import { Ruleset } from '../shared/models/ruleset.model';
-import { Stock } from '../shared/models/stock.model';
-import { MathUtils } from '../shared/utils/math.utils';
-import { StringUtils } from '../shared/utils/string.utils';
+import { AnalysisResults } from 'src/app/shared/models/analysis-results.model';
+import { CrossingType } from 'src/app/shared/models/crossing-type.model';
+import { GoldenCross } from 'src/app/shared/models/golden-cross.model';
+import { AnalysedPeriod } from 'src/app/shared/models/period.model';
+import { Rule } from 'src/app/shared/models/rule.model';
+import { Ruleset } from 'src/app/shared/models/ruleset.model';
+import { Stock } from 'src/app/shared/models/stock.model';
+import { MathUtils } from 'src/app/shared/utils/math.utils';
+import { StringUtils } from 'src/app/shared/utils/string.utils';
 
 /** Provides functions to analyse and process price movements. */
 @Injectable({
@@ -39,14 +39,14 @@ export class AnalysisService {
       // During each turn, checks each rule to see if it is applicable to this turn number
       for (let r = 1; r <= ruleset.rules.length; r++) {
         const rule = ruleset.rules[r - 1];
-        if (!found && rule.turnsAllowed.includes(turn)) {
+        if (!found && rule.allowedTurns.includes(turn)) {
           // Then checks in all the data from the period, and keeps the crossings allowed by the rule
           for (const crossing of period.crossings) {
             if (
               !found &&
-              rule.typesAllowed.findIndex(
+              rule.allowedTypes.findIndex(
                 (t) =>
-                  crossing.type.firstMA === t.firstMA &&
+                  crossing.type.fromMA === t.fromMA &&
                   crossing.type.intoMA === t.intoMA
               ) !== -1
             ) {
@@ -67,20 +67,20 @@ export class AnalysisService {
                   )
                 );
 
-                const currentSplit =
-                  (ruleset.split[turn - 1] * 100) /
-                  ruleset.split.reduce((a, b) => a + b, 0) /
-                  100;
+                const currentSplit = MathUtils.returnPercentage(
+                  ruleset.split[turn - 1],
+                  ruleset.split.reduce((a, b) => a + b, 0),
+                  '1'
+                );
 
                 // If the condition in the formula was met, saves everything and end the turn
                 if (result !== -1) {
-                  costAverage =
-                    Math.round(
-                      (turn === 1
-                        ? result
-                        : (costAverage * usedCapital + result * currentSplit) /
-                          (usedCapital + currentSplit)) * 100
-                    ) / 100;
+                  costAverage = MathUtils.roundTwoDecimal(
+                    turn === 1
+                      ? result
+                      : (costAverage * usedCapital + result * currentSplit) /
+                          (usedCapital + currentSplit)
+                  );
                   usedCapital = usedCapital + currentSplit;
 
                   lastOfTypes.set(crossing.type, result);
@@ -112,14 +112,13 @@ export class AnalysisService {
     }
 
     // And calculates growth percentage before returning the results
-    gainsAfterTwoYears =
-      Math.round(
-        (priceTwoYears === costAverage
-          ? 0
-          : priceTwoYears > costAverage
-          ? (priceTwoYears - costAverage) / costAverage
-          : -(costAverage - priceTwoYears) / costAverage) * 100
-      ) / 100;
+    gainsAfterTwoYears = costAverage = MathUtils.roundTwoDecimal(
+      priceTwoYears === costAverage
+        ? 0
+        : priceTwoYears > costAverage
+        ? (priceTwoYears - costAverage) / costAverage
+        : -(costAverage - priceTwoYears) / costAverage
+    );
 
     return { costAverage, gainsAfterTwoYears, usedCapital, log };
   }

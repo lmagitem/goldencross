@@ -7,9 +7,12 @@ import { DataEntryComponent } from './components/data-entry/data-entry.component
 import { MainComponent } from './components/main/main.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { SortableHeader } from './shared/directives/sortable-header.directive';
+import { SortableHeaderDirective } from './shared/directives/sortable-header.directive';
 import { JsonExportComponent } from './components/json-export/json-export.component';
 import { ResultsDisplayComponent } from './components/results-display/results-display.component';
+import { RuleEditorComponent } from './components/rule-editor/rule-editor.component';
+import { ClosableTagComponent } from './shared/components/closable-tag/closable-tag.component';
+import { ConfirmModalComponent } from './shared/components/confirm-modal/confirm-modal.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +21,10 @@ import { ResultsDisplayComponent } from './components/results-display/results-di
     ResultsDisplayComponent,
     JsonExportComponent,
     MainComponent,
-    SortableHeader,
+    RuleEditorComponent,
+    ClosableTagComponent,
+    ConfirmModalComponent,
+    SortableHeaderDirective,
   ],
   imports: [
     BrowserModule,

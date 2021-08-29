@@ -1,0 +1,12 @@
+<div class="tag-container">
+  <div *ngFor="let tag of tags" aria-label="Close" class="close-btn p-2 m-2">
+    <span class="tag-id" [innerHTML]="tag.toString()"></span>
+    <span
+      class="close-tag"
+      aria-hidden="true"
+      (click)="closeTag(tag)"
+      [attr.data-tag-id]="tag"
+      >&times;</span
+    >
+  </div>
+</div>

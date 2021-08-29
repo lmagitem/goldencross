@@ -9,13 +9,34 @@ body {
     sans-serif;
 }
 
+input {
+  min-height: 30px;
+}
+
 .btn-link {
   color: black;
 }
 
 .card {
   background-color: #c9ccd1;
-  scrollbar-color: #a8a8a8 #5d7377;
+  scrollbar-color: #5d7377 #a8a8a8;
+}
+
+.nav-tabs {
+  background-color: darkgray;
+}
+
+.nav-item {
+  background-color: gainsboro;
+}
+
+.control-label {
+  margin-bottom: 0;
+}
+
+.form-text {
+  margin-top: 0;
+  margin-bottom: 0.75em;
 }
 
 .neg-price {
@@ -86,4 +107,8 @@ body {
 
 .smaller {
   font-size: 0.8em;
+}
+
+.nav-item {
+  cursor: pointer;
 }

@@ -1,0 +1,21 @@
+.tag-container {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  word-spacing: -2em;
+}
+
+.close-btn {
+  display: inline-block;
+  word-spacing: normal;
+  border-radius: 7px;
+  cursor: pointer;
+  background-color: rgb(90, 86, 86);
+  color: white;
+}
+
+.close-tag {
+  font-weight: 300;
+  font-size: 1.2em;
+  margin-left: 5px;
+}

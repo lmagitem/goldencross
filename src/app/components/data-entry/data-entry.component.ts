@@ -6,7 +6,7 @@ import {
   ViewChildren,
 } from '@angular/core';
 import { SubSink } from 'subsink';
-import { SortableHeader } from '../../shared/directives/sortable-header.directive';
+import { SortableHeaderDirective } from '../../shared/directives/sortable-header.directive';
 import { Stock } from '../../shared/models/stock.model';
 import * as _ from 'lodash';
 import {
@@ -21,12 +21,12 @@ import { Ruleset } from '../../shared/models/ruleset.model';
 import { RulesetColumn } from '../../shared/models/ruleset-column.model';
 import { LogType } from '../../shared/enums/log-type.enum';
 import { CrossingType } from '../../shared/models/crossing-type.model';
-import { DataService } from 'src/app/services/data.service';
-import { PriceDisplayService } from 'src/app/services/price-display.service';
-import { LoggingService } from 'src/app/services/logging.service';
-import { AnalysisService } from 'src/app/services/analysis.service';
 import { delay, map } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
+import { AnalysisService } from 'src/app/services/analysis/analysis.service';
+import { DataService } from 'src/app/services/data/data.service';
+import { LoggingService } from 'src/app/services/logging/logging.service';
+import { PriceDisplayService } from 'src/app/services/price-display/price-display.service';
 
 /** Displays a table used to enter and look at data. */
 @Component({
@@ -48,7 +48,9 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   /** The sorted entries in the table. */
   sortedStocks: Array<Stock> = [];
   /** The list of sortable headers. */
-  @ViewChildren(SortableHeader) headers: QueryList<SortableHeader> | undefined;
+  @ViewChildren(SortableHeaderDirective) headers:
+    | QueryList<SortableHeaderDirective>
+    | undefined;
 
   constructor(
     private dataService: DataService,
@@ -58,7 +60,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   ) {}
 
   /** Listens for the list of rows and rules coming from the json export service. */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.subs.sink = combineLatest([
       this.dataService.rows$,
       this.dataService.crossingTypeList$,
@@ -82,12 +84,12 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   }
 
   /** Unsubscribe to avoid memory loss. */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
 
   /** Sorts rows using the interacted column header that called that function. */
-  onSort(event: any) {
+  public onSort(event: any) {
     const column: SortColumn = _.has(event, 'column') ? event.column : '';
     const direction: SortDirection = _.has(event, 'direction')
       ? event.direction
@@ -114,7 +116,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   }
 
   /** Generates columns for each type of crossing that appear in the rows. */
-  generateDataEntryColumns(rows: Stock[]) {
+  public generateDataEntryColumns(rows: Stock[]) {
     this.dataEntryColumns = [];
     this.crossingTypeList.forEach((type: CrossingType) => {
       // For each type, add a first column
@@ -134,7 +136,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
             i <
             period.crossings.filter(
               (c) =>
-                c.type.firstMA === type.firstMA && c.type.intoMA === type.intoMA
+                c.type.fromMA === type.fromMA && c.type.intoMA === type.intoMA
             ).length;
             i++
           ) {
@@ -160,7 +162,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   }
 
   /** Generates columns for each ruleset used to process the data. */
-  generateRulesetColumns(sets: Ruleset[]) {
+  public generateRulesetColumns(sets: Ruleset[]) {
     this.rulesetColumns = [];
     sets.forEach((ruleset) => this.rulesetColumns.push({ ruleset }));
   }
@@ -174,7 +176,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     // Find the crossings corresponding to the given type and sort them
     const crossings = period.crossings
       .filter(
-        (c) => c.type.firstMA === type.firstMA && c.type.intoMA === type.intoMA
+        (c) => c.type.fromMA === type.fromMA && c.type.intoMA === type.intoMA
       )
       .sort(
         (a, b) =>
