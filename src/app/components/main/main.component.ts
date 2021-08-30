@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { DataService } from 'src/app/services/data/data.service';
+import { StateService } from 'src/app/services/state/state.service';
 import {
   initialLoggingStatus,
   LoggingService,
 } from 'src/app/services/logging/logging.service';
+import { TiingoRequestService } from 'src/app/services/tiingo-request/tiingo-request.service';
+import { Sector } from 'src/app/shared/enums/sector.enum';
 import { LogType } from '../../shared/enums/log-type.enum';
 
 /** The main page of the app where one can find all the features neatly stored into a beautiful accordion. */
@@ -25,18 +27,19 @@ export class MainComponent {
   advancedButtonsEnabled = false;
 
   constructor(
-    private dataService: DataService,
-    private loggingService: LoggingService
+    private stateService: StateService,
+    private loggingService: LoggingService,
+    private tiingoService: TiingoRequestService
   ) {}
 
   /** Sets the visibility of all columns to true. */
   public showColumns() {
-    this.dataService.showColumns();
+    this.stateService.showColumns();
   }
 
   /** Erases the app's data from the user local storage. */
   public clearLocalStorage() {
-    this.dataService.clearLocalStorage();
+    this.stateService.clearLocalStorage();
   }
 
   /** When the button to enable logging is clicked, enable/disable logging. */
@@ -56,5 +59,33 @@ export class MainComponent {
       default:
         break;
     }
+  }
+
+  public testTiingo() {
+    this.tiingoService
+      .getInfos({
+        name: 'General Electric',
+        ticker: 'ge',
+        sector: Sector.BANK,
+        analyzedPeriods: [],
+      })
+      .subscribe((r) => {
+        console.log('General info', r);
+        if (!!r.body && !!r.body.startDate) {
+          this.tiingoService
+            .getHistoricalPrices(
+              {
+                name: 'General Electric',
+                ticker: 'ge',
+                sector: Sector.BANK,
+                analyzedPeriods: [],
+              },
+              new Date(r.body.startDate)
+            )
+            .subscribe((a) => {
+              console.log('Historical prices', a);
+            });
+        }
+      });
   }
 }

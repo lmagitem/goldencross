@@ -16,7 +16,9 @@ import { StorageService } from '../storage/storage.service';
 @Injectable({
   providedIn: 'root',
 })
-export class DataService {
+export class StateService {
+  /** The token to use in order to retreive data from Tiingo. */
+  private apiToken = new BehaviorSubject<string>('');
   /** The crossing types to manage for this session. */
   private crossingTypeList = new BehaviorSubject<CrossingType[]>([
     ...initialCrossingTypes,
@@ -27,6 +29,8 @@ export class DataService {
   private rulesets = new BehaviorSubject<Ruleset[]>([]);
   /** Emits true each time the user clicks on the button "Show columns". */
   private showColumnsAction = new Subject<boolean>();
+  /** The token to use in order to retreive data from Tiingo. */
+  public apiToken$ = this.apiToken.asObservable();
   /** The crossing types to manage for this session. */
   public crossingTypeList$ = this.crossingTypeList.asObservable();
   /** The stocks that serve as rows. */
@@ -47,6 +51,7 @@ export class DataService {
       if (
         json !==
         JSON.stringify({
+          apiToken: this.apiToken.value,
           stocks: this.rows.value,
           rulesets: this.rulesets.value,
         })
@@ -55,7 +60,7 @@ export class DataService {
 
         this.loggingService.log(
           LogType.JSON_PARSING,
-          'dataService > updateData() - Just received the following:',
+          'stateService > updateData() - Just received the following:',
           data
         );
 
@@ -66,16 +71,28 @@ export class DataService {
 
   /** Updates the stocks using the ones given in parameter. */
   public updateStocks(stocks: Stock[]) {
-    this.updateData({ stocks, rulesets: this.rulesets.value });
+    this.updateData({
+      apiToken: this.apiToken.value,
+      stocks,
+      rulesets: this.rulesets.value,
+    });
   }
 
   /** Updates the rulesets using the ones given in parameter. */
   public updateRulesets(rulesets: Ruleset[]) {
-    this.updateData({ stocks: this.rows.value, rulesets });
+    this.updateData({
+      apiToken: this.apiToken.value,
+      stocks: this.rows.value,
+      rulesets,
+    });
   }
 
   /** Stores the current state of the app in the user's browser. */
   public saveState() {
+    this.storageService.setSavedState(
+      this.apiToken.getValue(),
+      'goldencross_apiToken'
+    );
     this.storageService.setSavedState(
       this.crossingTypeList.getValue(),
       'goldencross_crossingTypeList'
@@ -89,6 +106,9 @@ export class DataService {
 
   /** Restores the state of the app from a previous session. */
   public restoreState() {
+    const newApiToken = this.storageService.getSavedState(
+      'goldencross_apiToken'
+    );
     const newCrossingTypeList = this.storageService.getSavedState(
       'goldencross_crossingTypeList'
     );
@@ -97,6 +117,9 @@ export class DataService {
       'goldencross_rulesets'
     );
 
+    if (newApiToken !== undefined) {
+      this.apiToken.next(newApiToken);
+    }
     if (newCrossingTypeList !== undefined) {
       this.crossingTypeList.next(newCrossingTypeList);
     }
@@ -110,6 +133,7 @@ export class DataService {
 
   /** Erases the app's data from the user local storage. */
   public clearLocalStorage() {
+    this.storageService.removeSavedState('goldencross_apiToken');
     this.storageService.removeSavedState('goldencross_crossingTypeList');
     this.storageService.removeSavedState('goldencross_rows');
     this.storageService.removeSavedState('goldencross_rulesets');
@@ -123,6 +147,7 @@ export class DataService {
   /** Updates the data, regenerates the crossing types with it, and saves everything in local storage. */
   private updateData(data: Export) {
     this.updateCrossingTypeList(data);
+    this.apiToken.next(data.apiToken);
     this.rows.next(data.stocks);
     this.rulesets.next(data.rulesets);
 
@@ -135,7 +160,7 @@ export class DataService {
       ? []
       : [...this.crossingTypeList.getValue()];
     data.stocks.forEach((stock) => {
-      stock.periods.forEach((period) => {
+      stock.analyzedPeriods.forEach((period) => {
         period.crossings.forEach((crossing) => {
           if (
             newCrossingTypeList.findIndex(

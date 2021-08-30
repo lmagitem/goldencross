@@ -1,11 +1,6 @@
-import { GoldenCross } from './golden-cross.model';
-
-/** Key data points for the analysed period. */
-export interface AnalysedPeriod {
+export interface Period {
   name: string;
-  previousHigh: number;
-  crossings: Array<GoldenCross>;
-  lowest: number;
-  priceSixMonths: number;
-  priceTwoYears: number;
+  yearlyInflation: number;
+  startDate: Date;
+  endDate: Date;
 }

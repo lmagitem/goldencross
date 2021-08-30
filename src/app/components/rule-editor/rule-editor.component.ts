@@ -9,7 +9,7 @@ import {
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import * as _ from 'lodash';
 import { first } from 'rxjs/operators';
-import { DataService } from 'src/app/services/data/data.service';
+import { StateService } from 'src/app/services/state/state.service';
 import { PriceDisplayService } from 'src/app/services/price-display/price-display.service';
 import { RuleEditorService } from 'src/app/services/rule-editor/rule-editor.service';
 import { ConfirmModalComponent } from 'src/app/shared/components/confirm-modal/confirm-modal.component';
@@ -55,14 +55,14 @@ export class RuleEditorComponent implements OnInit, OnDestroy {
   constructor(
     private modalService: NgbModal,
     private fb: FormBuilder,
-    private dataService: DataService,
+    private stateService: StateService,
     private priceDisplayService: PriceDisplayService,
     private ruleEditorService: RuleEditorService
   ) {}
 
   /** Load the current ruleset. */
   public ngOnInit(): void {
-    this.subs.sink = this.dataService.rulesets$.subscribe((rulesets) => {
+    this.subs.sink = this.stateService.rulesets$.subscribe((rulesets) => {
       this.updateRulesets(rulesets);
     });
   }
@@ -426,7 +426,7 @@ export class RuleEditorComponent implements OnInit, OnDestroy {
         );
         modalRef.result.then(
           (res) => {
-            this.subs.sink = this.dataService.rulesets$
+            this.subs.sink = this.stateService.rulesets$
               .pipe(first())
               .subscribe((rulesets) => {
                 this.updateRulesets(rulesets);
@@ -438,7 +438,7 @@ export class RuleEditorComponent implements OnInit, OnDestroy {
           }
         );
       } else {
-        this.subs.sink = this.dataService.rulesets$
+        this.subs.sink = this.stateService.rulesets$
           .pipe(first())
           .subscribe((rulesets) => {
             this.updateRulesets(rulesets);
@@ -451,7 +451,7 @@ export class RuleEditorComponent implements OnInit, OnDestroy {
   /** Saves the rulesets if the current one is valid. (The user shouldn't be able to modify a ruleset that's not the current one, so no biggy.) */
   public submit(): boolean {
     if (this.rulesetForm.valid) {
-      this.dataService.updateRulesets(this.rulesetForms.map((f) => f.value));
+      this.stateService.updateRulesets(this.rulesetForms.map((f) => f.value));
       return true;
     }
     return false;

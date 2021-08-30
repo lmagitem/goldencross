@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { DataService } from './data.service';
+import { MovingAverageService } from './moving-average.service';
 
-describe('dataService', () => {
-  let service: DataService;
+describe('MovingAverageService', () => {
+  let service: MovingAverageService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(DataService);
+    service = TestBed.inject(MovingAverageService);
   });
 
   it('should be created', () => {

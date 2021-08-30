@@ -13,6 +13,7 @@ import { ResultsDisplayComponent } from './components/results-display/results-di
 import { RuleEditorComponent } from './components/rule-editor/rule-editor.component';
 import { ClosableTagComponent } from './shared/components/closable-tag/closable-tag.component';
 import { ConfirmModalComponent } from './shared/components/confirm-modal/confirm-modal.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { ConfirmModalComponent } from './shared/components/confirm-modal/confirm
   imports: [
     BrowserModule,
     AppRoutingModule,
+    HttpClientModule,
     NgbModule,
     FormsModule,
     ReactiveFormsModule,

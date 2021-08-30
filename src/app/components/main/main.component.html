@@ -85,6 +85,14 @@
             <div class="m-2">
               <a
                 *ngIf="advancedButtonsEnabled"
+                container="body"
+                class="d-inline btn btn-info m-2 analysis-width"
+                role="button"
+                (click)="testTiingo()"
+                >Test Tiingo
+              </a>
+              <a
+                *ngIf="advancedButtonsEnabled"
                 placement="top"
                 ngbTooltip="Erases data that had been saved in your browser's local storage"
                 container="body"

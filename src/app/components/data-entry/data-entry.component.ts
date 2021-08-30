@@ -15,7 +15,7 @@ import {
 } from '../../shared/enums/sort-direction.enum';
 import { DataEntryColumn } from '../../shared/models/data-entry-column.model';
 import { GoldenCross } from '../../shared/models/golden-cross.model';
-import { AnalysedPeriod } from '../../shared/models/period.model';
+import { AnalysedPeriod } from '../../shared/models/analysed-period.model';
 import { ObjectUtils } from '../../shared/utils/object.utils';
 import { Ruleset } from '../../shared/models/ruleset.model';
 import { RulesetColumn } from '../../shared/models/ruleset-column.model';
@@ -24,7 +24,7 @@ import { CrossingType } from '../../shared/models/crossing-type.model';
 import { delay, map } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import { AnalysisService } from 'src/app/services/analysis/analysis.service';
-import { DataService } from 'src/app/services/data/data.service';
+import { StateService } from 'src/app/services/state/state.service';
 import { LoggingService } from 'src/app/services/logging/logging.service';
 import { PriceDisplayService } from 'src/app/services/price-display/price-display.service';
 
@@ -53,7 +53,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     | undefined;
 
   constructor(
-    private dataService: DataService,
+    private stateService: StateService,
     private analysisService: AnalysisService,
     private priceDisplayService: PriceDisplayService,
     private loggingService: LoggingService
@@ -62,8 +62,8 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   /** Listens for the list of rows and rules coming from the json export service. */
   public ngOnInit(): void {
     this.subs.sink = combineLatest([
-      this.dataService.rows$,
-      this.dataService.crossingTypeList$,
+      this.stateService.rows$,
+      this.stateService.crossingTypeList$,
     ])
       .pipe(map((results) => ({ rows: results[0], list: results[1] })))
       .pipe(delay(150))
@@ -73,12 +73,12 @@ export class DataEntryComponent implements OnInit, OnDestroy {
         this.sortedStocks = results.rows;
         this.generateDataEntryColumns(results.rows);
       });
-    this.subs.sink = this.dataService.rulesets$
+    this.subs.sink = this.stateService.rulesets$
       .pipe(delay(150))
       .subscribe((sets) => {
         this.generateRulesetColumns(sets);
       });
-    this.subs.sink = this.dataService.showColumnsAction$.subscribe(() => {
+    this.subs.sink = this.stateService.showColumnsAction$.subscribe(() => {
       this.showColumns();
     });
   }
@@ -130,7 +130,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
 
       // Then check in each period of each stock...
       rows.forEach((stock) =>
-        stock.periods?.forEach((period) => {
+        stock.analyzedPeriods?.forEach((period) => {
           for (
             let i = 0;
             i <

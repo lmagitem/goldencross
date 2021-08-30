@@ -45,27 +45,32 @@
     </thead>
     <tbody>
       <ng-container *ngFor="let stock of sortedStocks">
-        <tr *ngFor="let period of stock.periods; let periodIndex = index">
+        <tr
+          *ngFor="
+            let anlzdPeriod of stock.analyzedPeriods;
+            let periodIndex = index
+          "
+        >
           <th scope="row" [class.faded]="periodIndex !== 0">
             {{ stock.name }}
           </th>
           <td [class.faded]="periodIndex !== 0">
             {{ stock.sector }}
           </td>
-          <td>{{ period.name }}</td>
-          <td>{{ formatToTwoDigits(period.previousHigh) }}</td>
+          <td>{{ anlzdPeriod.period.name }}</td>
+          <td>{{ formatToTwoDigits(anlzdPeriod.previousHigh) }}</td>
           <td
             *ngFor="let column of dataEntryColumns"
             [class.d-none]="!column.visible"
-            [innerHTML]="getCrossing(column.index, column.type, period)"
+            [innerHTML]="getCrossing(column.index, column.type, anlzdPeriod)"
           ></td>
-          <td>{{ formatToTwoDigits(period.lowest) }}</td>
-          <td>{{ formatToTwoDigits(period.priceSixMonths) }}</td>
-          <td>{{ formatToTwoDigits(period.priceTwoYears) }}</td>
+          <td>{{ formatToTwoDigits(anlzdPeriod.lowest) }}</td>
+          <td>{{ formatToTwoDigits(anlzdPeriod.priceSixMonths) }}</td>
+          <td>{{ formatToTwoDigits(anlzdPeriod.priceTwoYears) }}</td>
           <td
             *ngFor="let column of rulesetColumns"
             class="results"
-            [innerHTML]="getAnalysisResults(stock, period, column.ruleset)"
+            [innerHTML]="getAnalysisResults(stock, anlzdPeriod, column.ruleset)"
           ></td>
         </tr>
       </ng-container>

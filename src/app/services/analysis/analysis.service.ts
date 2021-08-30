@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AnalysisResults } from 'src/app/shared/models/analysis-results.model';
 import { CrossingType } from 'src/app/shared/models/crossing-type.model';
 import { GoldenCross } from 'src/app/shared/models/golden-cross.model';
-import { AnalysedPeriod } from 'src/app/shared/models/period.model';
+import { AnalysedPeriod } from 'src/app/shared/models/analysed-period.model';
 import { Rule } from 'src/app/shared/models/rule.model';
 import { Ruleset } from 'src/app/shared/models/ruleset.model';
 import { Stock } from 'src/app/shared/models/stock.model';
@@ -18,12 +18,12 @@ export class AnalysisService {
    *  @description Usable keywords for the formula are: "avg", "last-used", "last-of-type", "curr", "prev-high" */
   public processDataWithRuleset(
     stock: Stock,
-    period: AnalysedPeriod,
+    anlzdPeriod: AnalysedPeriod,
     ruleset: Ruleset
   ): AnalysisResults {
     const lastOfTypes: Map<CrossingType, number> = new Map();
-    const previousHigh = period.previousHigh;
-    const priceTwoYears = period.priceTwoYears;
+    const previousHigh = anlzdPeriod.previousHigh;
+    const priceTwoYears = anlzdPeriod.priceTwoYears;
     let costAverage = previousHigh;
     let lastUsed = previousHigh;
     let gainsAfterTwoYears = 0;
@@ -31,7 +31,12 @@ export class AnalysisService {
     let lastBuy: Date | undefined = undefined;
     let found = false;
     let log =
-      stock.name + ' > ' + period.name + ' > ' + ruleset.name + ' - Bought ';
+      stock.name +
+      ' > ' +
+      anlzdPeriod.period.name +
+      ' > ' +
+      ruleset.name +
+      ' - Bought ';
 
     // Perform buying simulation
     for (let turn = 1; turn <= ruleset.split.length; turn++) {
@@ -41,7 +46,7 @@ export class AnalysisService {
         const rule = ruleset.rules[r - 1];
         if (!found && rule.allowedTurns.includes(turn)) {
           // Then checks in all the data from the period, and keeps the crossings allowed by the rule
-          for (const crossing of period.crossings) {
+          for (const crossing of anlzdPeriod.crossings) {
             if (
               !found &&
               rule.allowedTypes.findIndex(

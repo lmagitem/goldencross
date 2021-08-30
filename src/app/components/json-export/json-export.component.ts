@@ -5,7 +5,7 @@ import { LogType } from 'src/app/shared/enums/log-type.enum';
 import { SubSink } from 'subsink';
 import { delay, map } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
-import { DataService } from 'src/app/services/data/data.service';
+import { StateService } from 'src/app/services/state/state.service';
 import { LoggingService } from 'src/app/services/logging/logging.service';
 
 /** A text field in which one can put or retreive the dataset used by the app. */
@@ -17,29 +17,39 @@ import { LoggingService } from 'src/app/services/logging/logging.service';
 export class JsonExportComponent implements OnInit, OnDestroy {
   /** Subscription management. */
   private subs: SubSink = new SubSink();
-  /** A copy of the data found in dataService, used to prepare the json to display. */
+  /** A copy of the data found in stateService, used to prepare the json to display. */
+  private apiToken: string = '';
+  /** A copy of the data found in stateService, used to prepare the json to display. */
   private stocks: Array<Stock> = [];
-  /** A copy of the data found in dataService, used to prepare the json to display. */
+  /** A copy of the data found in stateService, used to prepare the json to display. */
   private rulesets: Array<Ruleset> = [];
   /** The json to display. */
   jsonContent = '';
 
   constructor(
-    private dataService: DataService,
+    private stateService: StateService,
     private loggingService: LoggingService
   ) {}
 
   /** When the data changes, make a local copy and update the json to display. */
   public ngOnInit(): void {
-    this.dataService.restoreState();
+    this.stateService.restoreState();
 
     this.subs.sink = combineLatest([
-      this.dataService.rows$,
-      this.dataService.rulesets$,
+      this.stateService.apiToken$,
+      this.stateService.rows$,
+      this.stateService.rulesets$,
     ])
-      .pipe(map((results) => ({ rows: results[0], rulesets: results[1] })))
+      .pipe(
+        map((results) => ({
+          apiToken: results[0],
+          rows: results[1],
+          rulesets: results[2],
+        }))
+      )
       .pipe(delay(150))
-      .subscribe((results: { rows: any; rulesets: any }) => {
+      .subscribe((results: { apiToken: any; rows: any; rulesets: any }) => {
+        this.apiToken = results.apiToken;
         this.stocks = results.rows;
         this.rulesets = results.rulesets;
         this.updateContent();
@@ -54,6 +64,7 @@ export class JsonExportComponent implements OnInit, OnDestroy {
   /** Updates what is displayed to the user. */
   public updateContent(): void {
     this.jsonContent = JSON.stringify({
+      apiToken: this.apiToken,
       stocks: this.stocks,
       rulesets: this.rulesets,
     });
@@ -83,7 +94,7 @@ export class JsonExportComponent implements OnInit, OnDestroy {
           .replace(/(?:^|:|,)(?:\s*\[)+/g, '')
       )
     ) {
-      this.dataService.updateDataFromJson(json);
+      this.stateService.updateDataFromJson(json);
     }
   }
 }
