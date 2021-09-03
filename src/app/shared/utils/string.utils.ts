@@ -4,14 +4,22 @@ export class StringUtils {
    *  @param regex The regex used to test the string.
    *  @param string The string to process. */
   public static findMatches(regex: RegExp, string: string): string[] {
-    const matches = StringUtils.doFindMatches(
-      new RegExp(regex.source, regex.flags.replace('g', '')),
-      string,
-      []
-    );
     const result: string[] = [];
-    for (const match of matches) {
-      result.push(match[0]);
+    if (
+      string !== undefined &&
+      string !== null &&
+      typeof string === 'string' &&
+      regex !== undefined &&
+      regex !== null
+    ) {
+      const matches = StringUtils.doFindMatches(
+        new RegExp(regex.source, regex.flags.replace('g', '')),
+        string,
+        []
+      );
+      for (const match of matches) {
+        result.push(match[0]);
+      }
     }
 
     return result;
@@ -21,7 +29,7 @@ export class StringUtils {
    *  @param regex The regex used to test the string.
    *  @param string The string to process.
    *  @param matches The occurences already found. */
-  public static doFindMatches(
+  private static doFindMatches(
     regex: RegExp,
     string: string,
     matches: any[] = []

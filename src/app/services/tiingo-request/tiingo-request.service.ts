@@ -31,8 +31,6 @@ export class TiingoRequestService implements OnDestroy {
 
   /** Returns general infos about a given ticker and its available data on Tiingo. */
   getInfos(stock: Stock): Observable<HttpResponse<TickerInfos>> {
-    console.log('Trying to get general infos about ' + stock.name + '.');
-
     const headers = new HttpHeaders().append(
       'Content-Type',
       'application/json'
@@ -52,18 +50,6 @@ export class TiingoRequestService implements OnDestroy {
     startDate: Date,
     endDate?: Date
   ): Observable<HttpResponse<EndOfDayPrice[]>> {
-    console.log(
-      'Trying to get historical prices for ' +
-        stock.name +
-        (!!endDate
-          ? ' between ' +
-            startDate.toUTCString() +
-            ' and ' +
-            endDate.toUTCString() +
-            '.'
-          : ' since ' + startDate.toUTCString() + '.')
-    );
-
     const headers = new HttpHeaders().append(
       'Content-Type',
       'application/json'

@@ -13,7 +13,6 @@ import { StateService } from 'src/app/services/state/state.service';
 import { PriceDisplayService } from 'src/app/services/price-display/price-display.service';
 import { RuleEditorService } from 'src/app/services/rule-editor/rule-editor.service';
 import { ConfirmModalComponent } from 'src/app/shared/components/confirm-modal/confirm-modal.component';
-import { ClosableTagComponent } from 'src/app/shared/components/closable-tag/closable-tag.component';
 import { CrossingType } from 'src/app/shared/models/crossing-type.model';
 import { Ruleset } from 'src/app/shared/models/ruleset.model';
 import { StringableKeyValuePair } from 'src/app/shared/models/stringable-key-value-pair.model';
@@ -153,10 +152,6 @@ export class RuleEditorComponent implements OnInit, OnDestroy {
 
   /** Is the split value entered by the user valid? */
   public isCurrentSplitValid(): boolean {
-    console.log(
-      this.currentSplit,
-      MathUtils.isNumericTwoDigits(this.currentSplit)
-    );
     return MathUtils.isNumericTwoDigits(this.currentSplit);
   }
 

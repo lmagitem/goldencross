@@ -7,6 +7,7 @@ import {
 import { TiingoRequestService } from 'src/app/services/tiingo-request/tiingo-request.service';
 import { Sector } from 'src/app/shared/enums/sector.enum';
 import { LogType } from '../../shared/enums/log-type.enum';
+import { DataProcessingService } from 'src/app/services/data-processing/data-processing.service';
 
 /** The main page of the app where one can find all the features neatly stored into a beautiful accordion. */
 @Component({
@@ -29,7 +30,7 @@ export class MainComponent {
   constructor(
     private stateService: StateService,
     private loggingService: LoggingService,
-    private tiingoService: TiingoRequestService
+    private dataProcessingService: DataProcessingService
   ) {}
 
   /** Sets the visibility of all columns to true. */
@@ -62,30 +63,13 @@ export class MainComponent {
   }
 
   public testTiingo() {
-    this.tiingoService
-      .getInfos({
-        name: 'General Electric',
-        ticker: 'ge',
-        sector: Sector.BANK,
+    this.dataProcessingService
+      .processStock({
+        name: 'AMD',
+        ticker: 'AMD',
+        sector: Sector.SEMICONDUCTORS,
         analyzedPeriods: [],
       })
-      .subscribe((r) => {
-        console.log('General info', r);
-        if (!!r.body && !!r.body.startDate) {
-          this.tiingoService
-            .getHistoricalPrices(
-              {
-                name: 'General Electric',
-                ticker: 'ge',
-                sector: Sector.BANK,
-                analyzedPeriods: [],
-              },
-              new Date(r.body.startDate)
-            )
-            .subscribe((a) => {
-              console.log('Historical prices', a);
-            });
-        }
-      });
+      .then((stock) => console.log(stock));
   }
 }

@@ -1,5 +1,6 @@
 import { MovingAveragePrice } from './moving-average-price.model';
 
+/** Data model from Tiingo that gives price infos about a stock on a given date. */
 export interface EndOfDayPrice {
   date: Date;
   close: number;
@@ -14,5 +15,5 @@ export interface EndOfDayPrice {
   adjVolume: number;
   divCash: number;
   splitFactor: number;
-  movingAveragePrices: MovingAveragePrice[];
+  movingAveragePrices?: MovingAveragePrice[];
 }

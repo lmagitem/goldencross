@@ -6,7 +6,7 @@ import { AppComponent } from './app.component';
 import { DataEntryComponent } from './components/data-entry/data-entry.component';
 import { MainComponent } from './components/main/main.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SortableHeaderDirective } from './shared/directives/sortable-header.directive';
 import { JsonExportComponent } from './components/json-export/json-export.component';
 import { ResultsDisplayComponent } from './components/results-display/results-display.component';
@@ -35,7 +35,7 @@ import { HttpClientModule } from '@angular/common/http';
     FormsModule,
     ReactiveFormsModule,
   ],
-  providers: [],
+  providers: [FormBuilder],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

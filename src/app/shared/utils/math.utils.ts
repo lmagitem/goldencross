@@ -5,8 +5,6 @@ import { StringUtils } from './string.utils';
 export class MathUtils {
   /** A regex formula to detect whitespaces. */
   public static WHITESPACE_REGEX: RegExp = new RegExp(/\s/g);
-  /** A regex formula to detect integers. */
-  public static INTEGER_REGEX: RegExp = new RegExp(/^\d+$/g);
   /** A regex formula to detect numbers being typed (the . is allowed not to be followed by numbers). */
   public static TYPING_NUMBER_REGEX: RegExp = new RegExp(
     /^[0-9]+(\.[0-9]*){0,1}$/g
@@ -27,7 +25,8 @@ export class MathUtils {
     n = typeof n === 'string' ? n.replace(MathUtils.WHITESPACE_REGEX, '') : n;
     return (
       MathUtils.isNumeric(n) &&
-      StringUtils.findMatches(MathUtils.INTEGER_REGEX, n).length > 0
+      (Number.isInteger(n) ||
+        (typeof n === 'string' && Number.isInteger(parseFloat(n))))
     );
   }
 
