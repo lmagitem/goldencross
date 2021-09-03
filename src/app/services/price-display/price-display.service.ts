@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Timescale } from '../../shared/enums/timescale.enum';
 import { AnalysisResults } from '../../shared/models/analysis-results.model';
 import { CrossingType } from '../../shared/models/crossing-type.model';
-import { GoldenCross } from '../../shared/models/golden-cross.model';
+import { PriceAtCrossing } from '../../shared/models/golden-cross.model';
 
 /** Methods to manage how are prices displayed in the app. */
 @Injectable({
@@ -89,7 +89,7 @@ export class PriceDisplayService {
 
   /** Returns a displayable version of the data contained in a {@link GoldenCross}. */
   public getGoldenCrossWithClass(
-    goldenCross: GoldenCross,
+    goldenCross: PriceAtCrossing,
     getPriceAppreciationScore = (n: number) => 0
   ): string {
     return (

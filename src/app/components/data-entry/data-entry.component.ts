@@ -14,7 +14,7 @@ import {
   SortDirection,
 } from '../../shared/enums/sort-direction.enum';
 import { DataEntryColumn } from '../../shared/models/data-entry-column.model';
-import { GoldenCross } from '../../shared/models/golden-cross.model';
+import { PriceAtCrossing } from '../../shared/models/golden-cross.model';
 import { AnalysedPeriod } from '../../shared/models/analysed-period.model';
 import { ObjectUtils } from '../../shared/utils/object.utils';
 import { Ruleset } from '../../shared/models/ruleset.model';
@@ -186,7 +186,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     // Then if there are indeed some to display, get the one corresponding to the required column
     if (crossings.length > index) {
       return this.priceDisplayService.getGoldenCrossWithClass(
-        GoldenCross.getInstance(crossings[index]),
+        PriceAtCrossing.getInstance(crossings[index]),
         (n: number) =>
           this.priceDisplayService.getPriceAppreciation(
             n,

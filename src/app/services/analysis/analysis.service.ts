@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AnalysisResults } from 'src/app/shared/models/analysis-results.model';
 import { CrossingType } from 'src/app/shared/models/crossing-type.model';
-import { GoldenCross } from 'src/app/shared/models/golden-cross.model';
+import { PriceAtCrossing } from 'src/app/shared/models/golden-cross.model';
 import { AnalysedPeriod } from 'src/app/shared/models/analysed-period.model';
 import { Rule } from 'src/app/shared/models/rule.model';
 import { Ruleset } from 'src/app/shared/models/ruleset.model';
@@ -135,7 +135,7 @@ export class AnalysisService {
     previousHigh: number,
     lastUsed: number,
     lastOfTypes: Map<CrossingType, number>,
-    crossing: GoldenCross
+    crossing: PriceAtCrossing
   ) {
     const lastOfType: number = MathUtils.isNumeric(
       lastOfTypes.get(crossing.type)
