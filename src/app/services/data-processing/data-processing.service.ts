@@ -32,25 +32,25 @@ const periodsToAnalyze: Period[] = [
     yearlyInflation: 4.6,
     startDate: new Date(1990, 6, 1),
     endDate: new Date(1991, 2, 1),
-  } ,
+  } ,*/
   {
     name: 'Early 2000s',
     yearlyInflation: 1.6,
     startDate: new Date(2001, 2, 1),
     endDate: new Date(2001, 10, 1),
-  },*/
+  },
   {
     name: '08',
     yearlyInflation: 2.1,
     startDate: new Date(2007, 11, 1),
     endDate: new Date(2009, 5, 1),
-  } /*,
+  },
   {
     name: 'COVID',
     yearlyInflation: 1.2,
     startDate: new Date(2020, 1, 1),
     endDate: new Date(2020, 3, 1),
-  },*/,
+  },
 ];
 
 /** Methods to process and calculate the data used by this app. */

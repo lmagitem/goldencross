@@ -22,6 +22,8 @@ export class JsonExportComponent implements OnInit, OnDestroy {
   /** A copy of the data found in stateService, used to prepare the json to display. */
   private stocks: Array<Stock> = [];
   /** A copy of the data found in stateService, used to prepare the json to display. */
+  private rows: Array<Stock> = [];
+  /** A copy of the data found in stateService, used to prepare the json to display. */
   private rulesets: Array<Ruleset> = [];
   /** The json to display. */
   jsonContent = '';
@@ -37,23 +39,28 @@ export class JsonExportComponent implements OnInit, OnDestroy {
 
     this.subs.sink = combineLatest([
       this.stateService.apiToken$,
+      this.stateService.stocks$,
       this.stateService.rows$,
       this.stateService.rulesets$,
     ])
       .pipe(
         map((results) => ({
           apiToken: results[0],
-          rows: results[1],
-          rulesets: results[2],
+          stocks: results[1],
+          rows: results[2],
+          rulesets: results[3],
         }))
       )
       .pipe(delay(150))
-      .subscribe((results: { apiToken: any; rows: any; rulesets: any }) => {
-        this.apiToken = results.apiToken;
-        this.stocks = results.rows;
-        this.rulesets = results.rulesets;
-        this.updateContent();
-      });
+      .subscribe(
+        (results: { apiToken: any; stocks: any; rows: any; rulesets: any }) => {
+          this.apiToken = results.apiToken;
+          this.stocks = results.stocks;
+          this.rows = results.rows;
+          this.rulesets = results.rulesets;
+          this.updateContent();
+        }
+      );
   }
 
   /** Unsubscribe to avoid memory loss. */
@@ -66,6 +73,7 @@ export class JsonExportComponent implements OnInit, OnDestroy {
     this.jsonContent = JSON.stringify({
       apiToken: this.apiToken,
       stocks: this.stocks,
+      rows: this.rows,
       rulesets: this.rulesets,
     });
 

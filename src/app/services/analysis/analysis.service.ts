@@ -117,7 +117,7 @@ export class AnalysisService {
     }
 
     // And calculates growth percentage before returning the results
-    gainsAfterTwoYears = costAverage = MathUtils.roundTwoDecimal(
+    gainsAfterTwoYears = MathUtils.roundTwoDecimal(
       priceTwoYears === costAverage
         ? 0
         : priceTwoYears > costAverage

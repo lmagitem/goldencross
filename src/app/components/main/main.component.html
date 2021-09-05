@@ -24,6 +24,15 @@
                 >👁</a
               >
               <a
+                placement="bottom"
+                ngbTooltip="Hide or show the moving average columns"
+                container="body"
+                class="d-inline btn btn-info m-2"
+                role="button"
+                (click)="showAllColumns()"
+                >👁👁</a
+              >
+              <a
                 *ngIf="advancedButtonsEnabled"
                 placement="bottom"
                 ngbTooltip="Shows analysis logs in your browser console"
@@ -88,8 +97,8 @@
                 container="body"
                 class="d-inline btn btn-info m-2 analysis-width"
                 role="button"
-                (click)="testTiingo()"
-                >Test Tiingo
+                (click)="fillWithTiingo()"
+                >Fill data with Tiingo
               </a>
               <a
                 *ngIf="advancedButtonsEnabled"

@@ -1,3 +1,4 @@
+import { Industry } from '../enums/industry.enum';
 import { Sector } from '../enums/sector.enum';
 import { AnalysedPeriod } from './analysed-period.model';
 
@@ -6,5 +7,7 @@ export interface Stock {
   name: string;
   ticker: string;
   sector: Sector;
+  industry: Industry;
+  tags: string[];
   analyzedPeriods: Array<AnalysedPeriod>;
 }

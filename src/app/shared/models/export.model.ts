@@ -5,5 +5,6 @@ import { Stock } from './stock.model';
 export interface Export {
   apiToken: string;
   stocks: Array<Stock>;
+  rows: Array<Stock>;
   rulesets: Array<Ruleset>;
 }

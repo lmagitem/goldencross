@@ -1,3 +1,4 @@
+import { testAMDPriceHistory } from '../others/test-data';
 import { DateUtils } from './date.utils';
 
 describe('DateUtils', () => {
@@ -291,5 +292,11 @@ describe('DateUtils', () => {
         'start'
       )
     ).toEqual(-1);
+    expect(
+      DateUtils.findIndexAtDate(
+        testAMDPriceHistory,
+        new Date('2009-05-31T22:00:00.000Z')
+      )
+    ).toEqual(576);
   });
 });

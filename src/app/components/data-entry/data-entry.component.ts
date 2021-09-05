@@ -27,6 +27,7 @@ import { AnalysisService } from 'src/app/services/analysis/analysis.service';
 import { StateService } from 'src/app/services/state/state.service';
 import { LoggingService } from 'src/app/services/logging/logging.service';
 import { PriceDisplayService } from 'src/app/services/price-display/price-display.service';
+import { StringUtils } from 'src/app/shared/utils/string.utils';
 
 /** Displays a table used to enter and look at data. */
 @Component({
@@ -47,6 +48,8 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   stocks: Array<Stock> = [];
   /** The sorted entries in the table. */
   sortedStocks: Array<Stock> = [];
+  /** Should we hide the Moving Averages columns? */
+  hideMAColumns = true;
   /** The list of sortable headers. */
   @ViewChildren(SortableHeaderDirective) headers:
     | QueryList<SortableHeaderDirective>
@@ -80,6 +83,9 @@ export class DataEntryComponent implements OnInit, OnDestroy {
       });
     this.subs.sink = this.stateService.showColumnsAction$.subscribe(() => {
       this.showColumns();
+    });
+    this.subs.sink = this.stateService.showAllColumnsAction$.subscribe(() => {
+      this.showAllColumns();
     });
   }
 
@@ -220,8 +226,18 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     return (Math.round(n * 100) / 100).toFixed(2);
   }
 
+  public enumToString(e: any): string {
+    const s = (StringUtils.replaceAll(e, '_', ' ') as string).toLowerCase();
+    return s.charAt(0).toUpperCase() + s.substring(1);
+  }
+
   /** Sets the visibility of all columns to true. */
   public showColumns() {
     this.dataEntryColumns.forEach((c) => (c.visible = true));
+  }
+
+  /** Switch the visibility of moving average columns. */
+  public showAllColumns() {
+    this.hideMAColumns = !this.hideMAColumns;
   }
 }

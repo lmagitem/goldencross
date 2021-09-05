@@ -33,6 +33,7 @@ export class DateUtils {
 
   /** Finds the index of the object which has a date field whose content equals the given date. */
   public static findIndexAtDate(array: any[], onDate: Date, field = 'date') {
+    onDate = new Date(onDate);
     return array.findIndex((p) => {
       const date = new Date(p[field]);
       return (

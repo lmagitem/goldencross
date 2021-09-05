@@ -1,13 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { StateService } from 'src/app/services/state/state.service';
 import {
   initialLoggingStatus,
   LoggingService,
 } from 'src/app/services/logging/logging.service';
-import { TiingoRequestService } from 'src/app/services/tiingo-request/tiingo-request.service';
-import { Sector } from 'src/app/shared/enums/sector.enum';
 import { LogType } from '../../shared/enums/log-type.enum';
 import { DataProcessingService } from 'src/app/services/data-processing/data-processing.service';
+import { first } from 'rxjs/operators';
+import { Stock } from 'src/app/shared/models/stock.model';
 
 /** The main page of the app where one can find all the features neatly stored into a beautiful accordion. */
 @Component({
@@ -38,6 +38,11 @@ export class MainComponent {
     this.stateService.showColumns();
   }
 
+  /** Sets the visibility of all columns to true. */
+  public showAllColumns() {
+    this.stateService.showAllColumns();
+  }
+
   /** Erases the app's data from the user local storage. */
   public clearLocalStorage() {
     this.stateService.clearLocalStorage();
@@ -62,14 +67,16 @@ export class MainComponent {
     }
   }
 
-  public testTiingo() {
-    this.dataProcessingService
-      .processStock({
-        name: 'AMD',
-        ticker: 'AMD',
-        sector: Sector.SEMICONDUCTORS,
-        analyzedPeriods: [],
-      })
-      .then((stock) => console.log(stock));
+  public fillWithTiingo() {
+    const rows: Stock[] = [];
+    this.stateService.stocks$.pipe(first()).subscribe((stocks) => {
+      stocks.forEach((s) => {
+        rows.push(s);
+        this.dataProcessingService.processStock(s).then((stock) => {
+          this.stateService.updateRows(rows);
+        });
+      });
+      this.stateService.updateRows(rows);
+    });
   }
 }

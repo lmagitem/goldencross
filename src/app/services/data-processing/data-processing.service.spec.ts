@@ -17,8 +17,6 @@ import { HttpResponse } from '@angular/common/http';
 import { EndOfDayPrice } from 'src/app/shared/models/end-of-day-price.model';
 import { Stock } from 'src/app/shared/models/stock.model';
 import { TickerInfos } from 'src/app/shared/models/ticker-infos.model';
-import { DateUtils } from 'src/app/shared/utils/date.utils';
-import { MathUtils } from 'src/app/shared/utils/math.utils';
 
 class MockTiingoService extends TiingoRequestService {
   getInfos(stock: Stock): Observable<HttpResponse<TickerInfos>> {

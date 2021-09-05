@@ -4,6 +4,11 @@
   font-size: 0.8em;
 }
 
+.table th,
+.table td {
+  max-width: 154px;
+}
+
 thead > tr > th,
 tbody > tr > th,
 tbody > tr > td {

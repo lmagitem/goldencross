@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import * as _ from 'lodash';
+import * as moment from 'moment';
 import { EndOfDayPrice } from 'src/app/shared/models/end-of-day-price.model';
 import { DateUtils } from 'src/app/shared/utils/date.utils';
 import { MathUtils } from 'src/app/shared/utils/math.utils';
@@ -15,8 +17,37 @@ export class PriceService {
     data: EndOfDayPrice[]
   ) {
     DateUtils.sortByDate(data);
-    data = data.slice(DateUtils.findIndexAtDate(data, start));
-    data = data.slice(0, DateUtils.findIndexAtDate(data, end));
+
+    // Find the starting date (or the nearest day before that), and cut everything before
+    let startDate = new Date(start);
+    let startFound = false;
+    let startIndex = -1;
+    let turn = 0;
+    do {
+      startIndex = DateUtils.findIndexAtDate(data, startDate);
+      startFound = startIndex !== -1 ? true : false;
+      startDate =
+        startIndex !== -1
+          ? startDate
+          : moment(startDate).subtract(1, 'day').toDate();
+      turn++;
+    } while (turn < 7 || !startFound);
+    data = data.slice(startIndex);
+
+    // Find the end date (or the nearest day after that), and cut everything after
+    let endDate = new Date(end);
+    let endFound = false;
+    let endIndex = -1;
+    turn = 0;
+    do {
+      endIndex = DateUtils.findIndexAtDate(data, endDate);
+      endFound = endIndex !== -1 ? true : false;
+      endDate =
+        endIndex !== -1 ? endDate : moment(endDate).add(1, 'day').toDate();
+      turn++;
+    } while (turn < 7 || !endFound);
+    data = data.slice(0, endIndex);
+
     return data;
   }
 
@@ -28,7 +59,7 @@ export class PriceService {
     data: EndOfDayPrice[]
   ): EndOfDayPrice[] {
     DateUtils.sortByDate(data);
-    data = data.slice(0, DateUtils.findIndexAtDate(data, onDate));
+    data = data.slice(0, DateUtils.findIndexAtDate(data, new Date(onDate)));
     data = data.slice(-movingAverage);
     return data;
   }

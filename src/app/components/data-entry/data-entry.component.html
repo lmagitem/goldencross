@@ -22,6 +22,17 @@
         >
           Sector
         </th>
+        <th
+          scope="col"
+          sortable="industry"
+          (sort)="onSort($event)"
+          placement="top"
+          ngbTooltip="Click here to sort by industry"
+          container="body"
+        >
+          Industry
+        </th>
+        <th scope="col">Tags</th>
         <th scope="col">Period</th>
         <th scope="col">Prev. high</th>
         <th
@@ -31,7 +42,7 @@
           ngbTooltip="Click here to hide that column"
           container="body"
           class="sortable"
-          [class.d-none]="!column.visible"
+          [class.d-none]="!column.visible || hideMAColumns"
           [innerHTML]="column.name"
           (click)="column.visible = !column.visible"
         ></th>
@@ -55,13 +66,21 @@
             {{ stock.name }}
           </th>
           <td [class.faded]="periodIndex !== 0">
-            {{ stock.sector }}
+            {{ enumToString(stock.sector) }}
+          </td>
+          <td [class.faded]="periodIndex !== 0">
+            {{ enumToString(stock.industry) }}
+          </td>
+          <td [class.faded]="periodIndex !== 0">
+            <span *ngFor="let tag of stock.tags; let tagN = index">{{
+              tagN > 0 ? ", " + tag : tag
+            }}</span>
           </td>
           <td>{{ anlzdPeriod.period.name }}</td>
           <td>{{ formatToTwoDigits(anlzdPeriod.previousHigh) }}</td>
           <td
             *ngFor="let column of dataEntryColumns"
-            [class.d-none]="!column.visible"
+            [class.d-none]="!column.visible || hideMAColumns"
             [innerHTML]="getCrossing(column.index, column.type, anlzdPeriod)"
           ></td>
           <td>{{ formatToTwoDigits(anlzdPeriod.lowest) }}</td>

@@ -76,7 +76,11 @@ export class MovingAverageService {
         );
       } else if (
         eodp.movingAveragePrices !== undefined &&
-        eodp.movingAveragePrices.length > 0
+        eodp.movingAveragePrices.length > 0 &&
+        new Date(eodp.date).getFullYear() >=
+          dayPreviousStartDate.getFullYear() &&
+        new Date(eodp.date).getMonth() >= dayPreviousStartDate.getMonth() &&
+        new Date(eodp.date).getDate() >= dayPreviousStartDate.getDate()
       ) {
         // List all the prices in a easily usable map
         const hashMap = new Map(

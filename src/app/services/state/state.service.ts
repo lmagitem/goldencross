@@ -23,22 +23,30 @@ export class StateService {
   private crossingTypeList = new BehaviorSubject<CrossingType[]>([
     ...initialCrossingTypes,
   ]);
-  /** The stocks that serve as rows. */
+  /** The stocks to be filled. */
+  private stocks = new BehaviorSubject<Stock[]>([]);
+  /** The stocks filled with data that serve as rows. */
   private rows = new BehaviorSubject<Stock[]>([]);
   /** The rulesets with which the results are calculated. */
   private rulesets = new BehaviorSubject<Ruleset[]>([]);
   /** Emits true each time the user clicks on the button "Show columns". */
   private showColumnsAction = new Subject<boolean>();
+  /** Emits true each time the user clicks on the button "Show all columns". */
+  private showAllColumnsAction = new Subject<boolean>();
   /** The token to use in order to retreive data from Tiingo. */
   public apiToken$ = this.apiToken.asObservable();
   /** The crossing types to manage for this session. */
   public crossingTypeList$ = this.crossingTypeList.asObservable();
-  /** The stocks that serve as rows. */
+  /** The stocks to be filled. */
+  public stocks$ = this.stocks.asObservable();
+  /** The stocks filled with data that serve as rows. */
   public rows$ = this.rows.asObservable();
   /** The rulesets with which the results are calculated. */
   public rulesets$ = this.rulesets.asObservable();
   /** Emits true each time the user clicks on the button "Show columns". */
   public showColumnsAction$ = this.showColumnsAction.asObservable();
+  /** Emits true each time the user clicks on the button "Show all columns". */
+  public showAllColumnsAction$ = this.showAllColumnsAction.asObservable();
 
   constructor(
     private storageService: StorageService,
@@ -52,7 +60,8 @@ export class StateService {
         json !==
         JSON.stringify({
           apiToken: this.apiToken.value,
-          stocks: this.rows.value,
+          stocks: this.stocks.value,
+          rows: this.rows.value,
           rulesets: this.rulesets.value,
         })
       ) {
@@ -74,6 +83,23 @@ export class StateService {
     this.updateData({
       apiToken: this.apiToken.value,
       stocks,
+      rows:
+        stocks?.length > 0 &&
+        (this.rows.value === undefined ||
+          this.rows.value === null ||
+          this.rows.value.length < 1)
+          ? stocks
+          : this.rows.value,
+      rulesets: this.rulesets.value,
+    });
+  }
+
+  /** Updates the rows using the ones given in parameter. */
+  public updateRows(rows: Stock[]) {
+    this.updateData({
+      apiToken: this.apiToken.value,
+      stocks: this.stocks.value,
+      rows,
       rulesets: this.rulesets.value,
     });
   }
@@ -82,7 +108,8 @@ export class StateService {
   public updateRulesets(rulesets: Ruleset[]) {
     this.updateData({
       apiToken: this.apiToken.value,
-      stocks: this.rows.value,
+      stocks: this.stocks.value,
+      rows: this.rows.value,
       rulesets,
     });
   }
@@ -96,6 +123,10 @@ export class StateService {
     this.storageService.setSavedState(
       this.crossingTypeList.getValue(),
       'goldencross_crossingTypeList'
+    );
+    this.storageService.setSavedState(
+      this.stocks.getValue(),
+      'goldencross_stocks'
     );
     this.storageService.setSavedState(this.rows.getValue(), 'goldencross_rows');
     this.storageService.setSavedState(
@@ -112,6 +143,7 @@ export class StateService {
     const newCrossingTypeList = this.storageService.getSavedState(
       'goldencross_crossingTypeList'
     );
+    const newStocks = this.storageService.getSavedState('goldencross_stocks');
     const newRows = this.storageService.getSavedState('goldencross_rows');
     const newRulesets = this.storageService.getSavedState(
       'goldencross_rulesets'
@@ -122,6 +154,9 @@ export class StateService {
     }
     if (newCrossingTypeList !== undefined) {
       this.crossingTypeList.next(newCrossingTypeList);
+    }
+    if (newStocks !== undefined) {
+      this.stocks.next(newStocks);
     }
     if (newRows !== undefined) {
       this.rows.next(newRows);
@@ -135,6 +170,7 @@ export class StateService {
   public clearLocalStorage() {
     this.storageService.removeSavedState('goldencross_apiToken');
     this.storageService.removeSavedState('goldencross_crossingTypeList');
+    this.storageService.removeSavedState('goldencross_stocks');
     this.storageService.removeSavedState('goldencross_rows');
     this.storageService.removeSavedState('goldencross_rulesets');
   }
@@ -144,11 +180,17 @@ export class StateService {
     this.showColumnsAction.next(true);
   }
 
+  /** Emits true to show all hidden columns on the data entry table. */
+  public showAllColumns() {
+    this.showAllColumnsAction.next(true);
+  }
+
   /** Updates the data, regenerates the crossing types with it, and saves everything in local storage. */
-  private updateData(data: Export) {
-    this.updateCrossingTypeList(data);
+  private updateData(data: Export, reset = true) {
+    this.updateCrossingTypeList(data, reset);
     this.apiToken.next(data.apiToken);
-    this.rows.next(data.stocks);
+    this.stocks.next(data.stocks);
+    this.rows.next(data.rows);
     this.rulesets.next(data.rulesets);
 
     this.saveState();
@@ -159,9 +201,9 @@ export class StateService {
     const newCrossingTypeList = reset
       ? []
       : [...this.crossingTypeList.getValue()];
-    data.stocks.forEach((stock) => {
-      stock.analyzedPeriods.forEach((period) => {
-        period.crossings.forEach((crossing) => {
+    data.rows.forEach((row) => {
+      row.analyzedPeriods?.forEach((period) => {
+        period.crossings?.forEach((crossing) => {
           if (
             newCrossingTypeList.findIndex(
               (t) =>
