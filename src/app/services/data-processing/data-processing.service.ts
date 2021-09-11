@@ -81,7 +81,19 @@ export class DataProcessingService {
           ) {
             stock.analyzedPeriods = [anlzdPeriod];
           } else {
-            stock.analyzedPeriods.push(anlzdPeriod);
+            const oldAnlzdPeriod = stock.analyzedPeriods.find(
+              (p) => p.period.name === anlzdPeriod.period.name
+            );
+            if (oldAnlzdPeriod !== undefined) {
+              oldAnlzdPeriod.crossings = anlzdPeriod.crossings;
+              oldAnlzdPeriod.lowest = anlzdPeriod.lowest;
+              oldAnlzdPeriod.previousHigh = anlzdPeriod.previousHigh;
+              oldAnlzdPeriod.priceHistory = anlzdPeriod.priceHistory;
+              oldAnlzdPeriod.priceSixMonths = anlzdPeriod.priceSixMonths;
+              oldAnlzdPeriod.priceTwoYears = anlzdPeriod.priceTwoYears;
+            } else {
+              stock.analyzedPeriods.push(anlzdPeriod);
+            }
           }
           turnsDone++;
           if (turnsDone >= periods.length) {

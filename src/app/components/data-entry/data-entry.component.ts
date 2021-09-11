@@ -33,6 +33,11 @@ import { industries, Industry } from 'src/app/shared/enums/industry.enum';
 import { periodsToAnalyze } from 'src/app/shared/others/periods-to-analyze';
 import { Period } from 'src/app/shared/models/period.model';
 import { StringableKeyValuePair } from 'src/app/shared/models/stringable-key-value-pair.model';
+import { DataProcessingService } from 'src/app/services/data-processing/data-processing.service';
+import { number, string, e } from 'mathjs';
+import { ConfirmModalComponent } from 'src/app/shared/components/confirm-modal/confirm-modal.component';
+import { ModalUtils } from 'src/app/shared/utils/modal.utils';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 /** Empty stock used to add new ones. */
 const EMPTY_STOCK = {
@@ -65,6 +70,8 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   sortedStocks: Array<Stock> = [];
   /** Should we hide the Moving Averages columns? */
   hideMAColumns = true;
+  /** The selected period for each stock */
+  selectedPeriods: Map<Stock, Period | 'all' | undefined> = new Map();
   /** New stock to add to the list. */
   newStock: Stock = _.cloneDeep(EMPTY_STOCK);
   /** New tag to add to a stock's tags. */
@@ -75,8 +82,10 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     | undefined;
 
   constructor(
+    private modalService: NgbModal,
     private stateService: StateService,
     private analysisService: AnalysisService,
+    private dataProcessingService: DataProcessingService,
     private priceDisplayService: PriceDisplayService,
     private loggingService: LoggingService
   ) {}
@@ -84,7 +93,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   /** Listens for the list of rows and rules coming from the json export service. */
   public ngOnInit(): void {
     this.subs.sink = combineLatest([
-      this.stateService.rows$,
+      this.stateService.stocks$,
       this.stateService.crossingTypeList$,
     ])
       .pipe(map((results) => ({ rows: results[0], list: results[1] })))
@@ -275,14 +284,14 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   }
 
   /** Updates the new stock's sector. */
-  public updateCurrentSector(event: any) {
+  public selectCurrentSector(event: any) {
     const value = (event.target as HTMLInputElement)
       .value as keyof typeof Sector;
     this.newStock.sector = Sector[value];
   }
 
   /** Updates the new stock's industry. */
-  public updateCurrentIndustry(event: any) {
+  public selectCurrentIndustry(event: any) {
     const value = (event.target as HTMLInputElement)
       .value as keyof typeof Industry;
     this.newStock.industry = Industry[value];
@@ -322,7 +331,96 @@ export class DataEntryComponent implements OnInit, OnDestroy {
 
   /** Add a new stock to the list from the data given by the user. */
   public addStock() {
-    console.log(this.newStock);
+    this.dataProcessingService
+      .processStock(this.newStock)
+      .then((stock) => {
+        this.stateService.addStock(stock);
+        this.newStock = _.cloneDeep(EMPTY_STOCK);
+      })
+      .catch((e) => {
+        console.error(e);
+        alert(
+          'An error has been encountered. It is probable that the stock ' +
+            this.newStock.name +
+            " doesn't exist in Tiingo's (our data provider) database, or that you made a typo on its ticker symbol."
+        );
+      });
+  }
+
+  /** Removes the selected stock from the table. */
+  removeStock(stock: Stock) {
+    const modalRef = this.modalService.open(ConfirmModalComponent);
+    ModalUtils.fillInstance(
+      modalRef,
+      'Warning',
+      'You are about to delete the stock named ' +
+        stock.name +
+        ' and all data that goes with it, are you sure?',
+      'Cancel',
+      'I am sure, delete it'
+    );
+    modalRef.result.then(
+      (res) => {
+        if (res === true) {
+          this.stateService.removeStock(stock);
+        }
+      },
+      (dismiss) => {}
+    );
+  }
+
+  /** Adds the selected period to analyze for the selected stock. */
+  addPeriod(stock: Stock) {
+    const content = this.selectedPeriods.get(stock);
+    if (content === 'all') {
+      this.dataProcessingService
+        .processStock(stock, [...this.getPeriods(stock)])
+        .then((s) => this.stateService.updateStock(s));
+    } else if (
+      content !== undefined &&
+      _.has(content, 'name') &&
+      _.has(content, 'yearlyInflation') &&
+      _.has(content, 'startDate') &&
+      _.has(content, 'endDate')
+    ) {
+      this.dataProcessingService
+        .processStock(stock, [content])
+        .then((s) => this.stateService.updateStock(s));
+    }
+  }
+
+  /** Updates data for the selected period. */
+  updatePeriod(anlzdPrd: AnalysedPeriod, stock: Stock) {
+    this.dataProcessingService
+      .processStock(stock, [anlzdPrd.period])
+      .then((s) => this.stateService.updateStock(s));
+  }
+
+  /** Removes the selected period. */
+  removePeriod(anlzdPrd: AnalysedPeriod, stock: Stock) {
+    stock.analyzedPeriods = stock.analyzedPeriods.filter(
+      (p) => p.period.name === anlzdPrd.period.name
+    );
+    this.stateService.updateStock(stock);
+  }
+
+  /** Changes the selected period to add to a given stock. */
+  selectCurrentPeriod(stock: Stock, event: any) {
+    const value = (event.target as HTMLInputElement).value;
+    if (value === undefined) {
+      this.selectedPeriods.set(stock, value);
+    } else if (value === 'all') {
+      this.selectedPeriods.set(stock, value);
+    } else if (
+      this.getPeriods(stock).findIndex((p) => p.name === value) !== 1
+    ) {
+      this.selectedPeriods.set(
+        stock,
+        this.getPeriods(stock).find((p) => p.name === value)
+      );
+    } else {
+      this.selectedPeriods.set(stock, undefined);
+    }
   }
 
   /** Format number to two digits for display in the table. */

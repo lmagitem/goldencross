@@ -23,10 +23,8 @@ export class StateService {
   private crossingTypeList = new BehaviorSubject<CrossingType[]>([
     ...initialCrossingTypes,
   ]);
-  /** The stocks to be filled. */
-  private stocks = new BehaviorSubject<Stock[]>([]);
   /** The stocks filled with data that serve as rows. */
-  private rows = new BehaviorSubject<Stock[]>([]);
+  private stocks = new BehaviorSubject<Stock[]>([]);
   /** The rulesets with which the results are calculated. */
   private rulesets = new BehaviorSubject<Ruleset[]>([]);
   /** Emits true each time the user clicks on the button "Show columns". */
@@ -37,10 +35,8 @@ export class StateService {
   public apiToken$ = this.apiToken.asObservable();
   /** The crossing types to manage for this session. */
   public crossingTypeList$ = this.crossingTypeList.asObservable();
-  /** The stocks to be filled. */
-  public stocks$ = this.stocks.asObservable();
   /** The stocks filled with data that serve as rows. */
-  public rows$ = this.rows.asObservable();
+  public stocks$ = this.stocks.asObservable();
   /** The rulesets with which the results are calculated. */
   public rulesets$ = this.rulesets.asObservable();
   /** Emits true each time the user clicks on the button "Show columns". */
@@ -61,7 +57,6 @@ export class StateService {
         JSON.stringify({
           apiToken: this.apiToken.value,
           stocks: this.stocks.value,
-          rows: this.rows.value,
           rulesets: this.rulesets.value,
         })
       ) {
@@ -78,30 +73,36 @@ export class StateService {
     }
   }
 
-  /** Updates the stocks using the ones given in parameter. */
+  /** Updates the rows using the ones given in parameter. */
   public updateStocks(stocks: Stock[]) {
     this.updateData({
       apiToken: this.apiToken.value,
-      stocks,
-      rows:
-        stocks?.length > 0 &&
-        (this.rows.value === undefined ||
-          this.rows.value === null ||
-          this.rows.value.length < 1)
-          ? stocks
-          : this.rows.value,
+      stocks: stocks,
       rulesets: this.rulesets.value,
     });
   }
 
-  /** Updates the rows using the ones given in parameter. */
-  public updateRows(rows: Stock[]) {
-    this.updateData({
-      apiToken: this.apiToken.value,
-      stocks: this.stocks.value,
-      rows,
-      rulesets: this.rulesets.value,
-    });
+  /** Add a new row to the existing ones. */
+  public addStock(row: Stock) {
+    this.updateStocks([...this.stocks.value, row]);
+  }
+
+  /** Updates an existing stock with the given data. */
+  public updateStock(row: Stock) {
+    const stocks = [...this.stocks.value];
+    const stock = stocks.find((s) => row.name === s.name);
+    if (stock !== undefined) {
+      stock.infos = row.infos;
+      stock.analyzedPeriods = row.analyzedPeriods;
+    } else {
+      stocks.push(row);
+    }
+    this.updateStocks(stocks);
+  }
+
+  /** Add a new row to the existing ones. */
+  public removeStock(row: Stock) {
+    this.updateStocks(this.stocks.value.filter((s) => s.name !== row.name));
   }
 
   /** Updates the rulesets using the ones given in parameter. */
@@ -109,7 +110,6 @@ export class StateService {
     this.updateData({
       apiToken: this.apiToken.value,
       stocks: this.stocks.value,
-      rows: this.rows.value,
       rulesets,
     });
   }
@@ -128,7 +128,6 @@ export class StateService {
       this.stocks.getValue(),
       'goldencross_stocks'
     );
-    this.storageService.setSavedState(this.rows.getValue(), 'goldencross_rows');
     this.storageService.setSavedState(
       this.rulesets.getValue(),
       'goldencross_rulesets'
@@ -144,7 +143,6 @@ export class StateService {
       'goldencross_crossingTypeList'
     );
     const newStocks = this.storageService.getSavedState('goldencross_stocks');
-    const newRows = this.storageService.getSavedState('goldencross_rows');
     const newRulesets = this.storageService.getSavedState(
       'goldencross_rulesets'
     );
@@ -158,9 +156,6 @@ export class StateService {
     if (newStocks !== undefined) {
       this.stocks.next(newStocks);
     }
-    if (newRows !== undefined) {
-      this.rows.next(newRows);
-    }
     if (newRulesets !== undefined) {
       this.rulesets.next(newRulesets);
     }
@@ -171,7 +166,6 @@ export class StateService {
     this.storageService.removeSavedState('goldencross_apiToken');
     this.storageService.removeSavedState('goldencross_crossingTypeList');
     this.storageService.removeSavedState('goldencross_stocks');
-    this.storageService.removeSavedState('goldencross_rows');
     this.storageService.removeSavedState('goldencross_rulesets');
   }
 
@@ -190,7 +184,6 @@ export class StateService {
     this.updateCrossingTypeList(data, reset);
     this.apiToken.next(data.apiToken);
     this.stocks.next(data.stocks);
-    this.rows.next(data.rows);
     this.rulesets.next(data.rulesets);
 
     this.saveState();
@@ -201,7 +194,7 @@ export class StateService {
     const newCrossingTypeList = reset
       ? []
       : [...this.crossingTypeList.getValue()];
-    data.rows.forEach((row) => {
+    data.stocks.forEach((row) => {
       row.analyzedPeriods?.forEach((period) => {
         period.crossings?.forEach((crossing) => {
           if (

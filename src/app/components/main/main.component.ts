@@ -66,17 +66,4 @@ export class MainComponent {
         break;
     }
   }
-
-  public fillWithTiingo() {
-    const rows: Stock[] = [];
-    this.stateService.stocks$.pipe(first()).subscribe((stocks) => {
-      stocks.forEach((s) => {
-        rows.push(s);
-        this.dataProcessingService.processStock(s).then((stock) => {
-          this.stateService.updateRows(rows);
-        });
-      });
-      this.stateService.updateRows(rows);
-    });
-  }
 }
