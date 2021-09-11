@@ -28,6 +28,21 @@ import { StateService } from 'src/app/services/state/state.service';
 import { LoggingService } from 'src/app/services/logging/logging.service';
 import { PriceDisplayService } from 'src/app/services/price-display/price-display.service';
 import { StringUtils } from 'src/app/shared/utils/string.utils';
+import { Sector, sectors } from 'src/app/shared/enums/sector.enum';
+import { industries, Industry } from 'src/app/shared/enums/industry.enum';
+import { periodsToAnalyze } from 'src/app/shared/others/periods-to-analyze';
+import { Period } from 'src/app/shared/models/period.model';
+import { StringableKeyValuePair } from 'src/app/shared/models/stringable-key-value-pair.model';
+
+/** Empty stock used to add new ones. */
+const EMPTY_STOCK = {
+  name: '',
+  ticker: '',
+  sector: Sector.COMMUNICATION_SERVICES,
+  industry: Industry.DIVERSIFIED_TELECOMMUNICATION_SERVICES,
+  tags: [],
+  analyzedPeriods: [],
+};
 
 /** Displays a table used to enter and look at data. */
 @Component({
@@ -50,6 +65,10 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   sortedStocks: Array<Stock> = [];
   /** Should we hide the Moving Averages columns? */
   hideMAColumns = true;
+  /** New stock to add to the list. */
+  newStock: Stock = _.cloneDeep(EMPTY_STOCK);
+  /** New tag to add to a stock's tags. */
+  currentTag: string = '';
   /** The list of sortable headers. */
   @ViewChildren(SortableHeaderDirective) headers:
     | QueryList<SortableHeaderDirective>
@@ -92,6 +111,30 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   /** Unsubscribe to avoid memory loss. */
   public ngOnDestroy(): void {
     this.subs.unsubscribe();
+  }
+
+  /** Returns the list of sectors to display for the new stock. */
+  public getSectors(): Sector[] {
+    return sectors;
+  }
+
+  /** Returns the list of industries to display for the new stock. */
+  public getIndustries(): Industry[] {
+    return industries.get(this.newStock.sector) || [];
+  }
+
+  /** Returns the list of periods to display for the new stock. */
+  public getPeriods(stock: Stock): Period[] {
+    return periodsToAnalyze.filter(
+      (p) =>
+        stock.analyzedPeriods === undefined ||
+        stock.analyzedPeriods === null ||
+        stock.analyzedPeriods === [] ||
+        (stock.analyzedPeriods !== undefined &&
+          stock.analyzedPeriods.findIndex(
+            (anlzdPrd) => anlzdPrd.period.name === p.name
+          ) === -1)
+    );
   }
 
   /** Sorts rows using the interacted column header that called that function. */
@@ -221,13 +264,76 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     return this.priceDisplayService.getAnalysisResultsWithClass(results);
   }
 
+  /** Updates the new stock's name. */
+  public updateCurrentName(event: any) {
+    this.newStock.name = (event.target as HTMLInputElement).value;
+  }
+
+  /** Updates the new stock's ticker. */
+  public updateCurrentTicker(event: any) {
+    this.newStock.ticker = (event.target as HTMLInputElement).value;
+  }
+
+  /** Updates the new stock's sector. */
+  public updateCurrentSector(event: any) {
+    const value = (event.target as HTMLInputElement)
+      .value as keyof typeof Sector;
+    this.newStock.sector = Sector[value];
+  }
+
+  /** Updates the new stock's industry. */
+  public updateCurrentIndustry(event: any) {
+    const value = (event.target as HTMLInputElement)
+      .value as keyof typeof Industry;
+    this.newStock.industry = Industry[value];
+  }
+
+  /** Updates the new stock's industry. */
+  public updateCurrentTag(event: any) {
+    this.currentTag = (event.target as HTMLInputElement).value;
+  }
+
+  /** Transforms the current list of tags into a {@link StringableKeyValuePair} array that can be fed to the {@link ClosableTagComponent}s. */
+  public toTags(): StringableKeyValuePair<string>[] {
+    const result: StringableKeyValuePair<string>[] = [];
+    for (let i = 0; i < this.newStock.tags.length; i++) {
+      result.push(new StringableKeyValuePair(i, this.newStock.tags[i]));
+    }
+    return result;
+  }
+
+  /** Uses the given array retreived from a {@link ClosableTagComponent} to update the new stock's tags list. */
+  public updateTags(tags: Array<StringableKeyValuePair<string>>) {
+    this.newStock.tags = this.newStock.tags.filter(
+      (t) => tags.findIndex((s) => s.data === t) !== -1
+    );
+  }
+
+  /** Adds a new tag to the new stock. */
+  public addTag() {
+    if (
+      this.currentTag !== '' &&
+      this.newStock.tags.findIndex((t) => t === this.currentTag) === -1
+    ) {
+      this.newStock.tags.push(this.currentTag);
+      this.currentTag = '';
+    }
+  }
+
+  /** Add a new stock to the list from the data given by the user. */
+  public addStock() {
+    console.log(this.newStock);
+  }
+
   /** Format number to two digits for display in the table. */
   public formatToTwoDigits(n: number): string {
     return (Math.round(n * 100) / 100).toFixed(2);
   }
 
   public enumToString(e: any): string {
-    const s = (StringUtils.replaceAll(e, '_', ' ') as string).toLowerCase();
+    const s = (
+      StringUtils.replaceAll(e + '', '_', ' ') as string
+    ).toLowerCase();
     return s.charAt(0).toUpperCase() + s.substring(1);
   }
 

@@ -14,45 +14,6 @@ import { PriceService } from '../price/price.service';
 import { StateService } from '../state/state.service';
 import { TiingoRequestService } from '../tiingo-request/tiingo-request.service';
 
-const periodsToAnalyze: Period[] = [
-  /*{
-    name: '73-74',
-    yearlyInflation: 9.3,
-    startDate: new Date(1973, 0, 11),
-    endDate: new Date(1974, 11, 6),
-  },
-  {
-    name: 'Black Monday',
-    yearlyInflation: 4.4,
-    startDate: new Date(1987, 9, 19),
-    endDate: new Date(1987, 10, 19),
-  },
-  {
-    name: 'Early 90s',
-    yearlyInflation: 4.6,
-    startDate: new Date(1990, 6, 1),
-    endDate: new Date(1991, 2, 1),
-  } ,*/
-  {
-    name: 'Early 2000s',
-    yearlyInflation: 1.6,
-    startDate: new Date(2001, 2, 1),
-    endDate: new Date(2001, 10, 1),
-  },
-  {
-    name: '08',
-    yearlyInflation: 2.1,
-    startDate: new Date(2007, 11, 1),
-    endDate: new Date(2009, 5, 1),
-  },
-  {
-    name: 'COVID',
-    yearlyInflation: 1.2,
-    startDate: new Date(2020, 1, 1),
-    endDate: new Date(2020, 3, 1),
-  },
-];
-
 /** Methods to process and calculate the data used by this app. */
 @Injectable({
   providedIn: 'root',
@@ -69,43 +30,68 @@ export class DataProcessingService {
    *  that period and calculate the moving averages required by the user's rulesets. */
   public processStock(stock: Stock, periods: Period[] = []): Promise<Stock> {
     return new Promise<Stock>((resolve, reject) => {
-      periods =
-        periods !== undefined && periods.length > 0
-          ? periods
-          : [...periodsToAnalyze];
       this.tiingoService
         .getInfos(stock)
         .pipe(first())
         .subscribe((response) => {
           const infos = response.body;
           if (infos !== undefined && infos !== null) {
-            this.stateService.rulesets$.pipe(first()).subscribe((rulesets) => {
-              let turnsDone = 0;
-              // Process each period we'd like to analyze
-              periods.forEach((p) =>
-                this.processPeriod(stock, infos, p, rulesets)
-                  .then((anlzdPeriod) => {
-                    if (
-                      stock.analyzedPeriods === undefined ||
-                      stock.analyzedPeriods === null
-                    ) {
-                      stock.analyzedPeriods = [anlzdPeriod];
-                    } else {
-                      stock.analyzedPeriods.push(anlzdPeriod);
-                    }
-                    turnsDone++;
-                    if (turnsDone >= periods.length) {
-                      resolve(stock);
-                    }
-                  })
-                  .catch((e) => {
-                    console.error(e);
-                  })
-              );
-            });
+            stock.infos = infos;
+            if (
+              periods !== undefined &&
+              periods !== null &&
+              periods.length > 0
+            ) {
+              this.stateService.rulesets$
+                .pipe(first())
+                .subscribe((rulesets) => {
+                  // Process each period we'd like to analyze
+                  this.processAllPeriods(
+                    periods,
+                    stock,
+                    infos,
+                    rulesets,
+                    resolve
+                  );
+                });
+            } else {
+              resolve(stock);
+            }
           }
         });
     });
+  }
+
+  /** For the given stock and periods, get infos and historical data about the stock price during
+   *  that period and calculate the moving averages required by the given rulesets. */
+  private processAllPeriods(
+    periods: Period[],
+    stock: Stock,
+    infos: TickerInfos,
+    rulesets: Ruleset[],
+    resolve: (value: Stock | PromiseLike<Stock>) => void
+  ) {
+    let turnsDone = 0;
+    periods.forEach((p) =>
+      this.processPeriod(stock, infos, p, rulesets)
+        .then((anlzdPeriod) => {
+          if (
+            stock.analyzedPeriods === undefined ||
+            stock.analyzedPeriods === null
+          ) {
+            stock.analyzedPeriods = [anlzdPeriod];
+          } else {
+            stock.analyzedPeriods.push(anlzdPeriod);
+          }
+          turnsDone++;
+          if (turnsDone >= periods.length) {
+            resolve(stock);
+          }
+        })
+        .catch((e) => {
+          console.error(e);
+        })
+    );
   }
 
   /** For the given stock and period, get infos and historical data about the stock price during

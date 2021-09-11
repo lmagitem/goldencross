@@ -18,8 +18,8 @@ import { Ruleset } from 'src/app/shared/models/ruleset.model';
 import { StringableKeyValuePair } from 'src/app/shared/models/stringable-key-value-pair.model';
 import { MathUtils } from 'src/app/shared/utils/math.utils';
 import { ModalUtils } from 'src/app/shared/utils/modal.utils';
-import { ReactiveFormUtils } from 'src/app/shared/utils/reactive-form.utils';
 import { SubSink } from 'subsink';
+import { ReactiveFormUtils } from 'src/app/shared/utils/reactive-form.utils';
 
 /** A form that enables to create and edit rulesets. */
 @Component({

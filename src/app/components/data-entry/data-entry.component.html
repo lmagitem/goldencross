@@ -2,6 +2,7 @@
   <table class="table table-striped">
     <thead>
       <tr>
+        <th></th>
         <th
           scope="col"
           sortable="name"
@@ -11,6 +12,16 @@
           container="body"
         >
           Name
+        </th>
+        <th
+          scope="col"
+          sortable="ticker"
+          (sort)="onSort($event)"
+          placement="top"
+          ngbTooltip="Click here to sort by ticker"
+          container="body"
+        >
+          Ticker
         </th>
         <th
           scope="col"
@@ -62,9 +73,18 @@
             let periodIndex = index
           "
         >
-          <th scope="row" [class.faded]="periodIndex !== 0">
-            {{ stock.name }}
+          <th scope="row">
+            <span *ngIf="periodIndex === 0"
+              ><a class="btn btn-danger">🗑</a
+              ><a class="btn btn-secondary">📡</a></span
+            ><a class="btn btn-dark">-</a>
           </th>
+          <td [class.faded]="periodIndex !== 0">
+            {{ stock.name }}
+          </td>
+          <td [class.faded]="periodIndex !== 0">
+            {{ stock.ticker }}
+          </td>
           <td [class.faded]="periodIndex !== 0">
             {{ enumToString(stock.sector) }}
           </td>
@@ -76,7 +96,15 @@
               tagN > 0 ? ", " + tag : tag
             }}</span>
           </td>
-          <td>{{ anlzdPeriod.period.name }}</td>
+          <td
+            [class.not-filled]="
+              anlzdPeriod.previousHigh === undefined ||
+              anlzdPeriod.previousHigh === null ||
+              anlzdPeriod.previousHigh <= 0
+            "
+          >
+            {{ anlzdPeriod.period.name }}
+          </td>
           <td>{{ formatToTwoDigits(anlzdPeriod.previousHigh) }}</td>
           <td
             *ngFor="let column of dataEntryColumns"
@@ -92,7 +120,154 @@
             [innerHTML]="getAnalysisResults(stock, anlzdPeriod, column.ruleset)"
           ></td>
         </tr>
+        <tr>
+          <th scope="row">
+            <span
+              *ngIf="!stock.analyzedPeriods || stock.analyzedPeriods.length < 1"
+              ><a class="btn btn-danger">🗑</a
+              ><a class="btn btn-dark">+</a></span
+            >
+            <span
+              *ngIf="
+                !!stock.analyzedPeriods && stock.analyzedPeriods.length > 0
+              "
+              ><a class="btn btn-dark">+</a></span
+            >
+          </th>
+          <td
+            [class.faded]="
+              !!stock.analyzedPeriods && stock.analyzedPeriods.length > 0
+            "
+          >
+            {{ stock.name }}
+          </td>
+          <td
+            [class.faded]="
+              !!stock.analyzedPeriods && stock.analyzedPeriods.length > 0
+            "
+          >
+            {{ stock.ticker }}
+          </td>
+          <td
+            [class.faded]="
+              !!stock.analyzedPeriods && stock.analyzedPeriods.length > 0
+            "
+          >
+            {{ enumToString(stock.sector) }}
+          </td>
+          <td
+            [class.faded]="
+              !!stock.analyzedPeriods && stock.analyzedPeriods.length > 0
+            "
+          >
+            {{ enumToString(stock.industry) }}
+          </td>
+          <td
+            [class.faded]="
+              !!stock.analyzedPeriods && stock.analyzedPeriods.length > 0
+            "
+          >
+            <span *ngFor="let tag of stock.tags; let tagN = index">{{
+              tagN > 0 ? ", " + tag : tag
+            }}</span>
+          </td>
+          <td>
+            <select class="form-control">
+              <option value="" disabled>Choose a period</option>
+              <option value="all" [disabled]="getPeriods(stock).length < 2">
+                Add all
+              </option>
+              <option *ngFor="let period of getPeriods(stock)" [value]="period">
+                {{ period.name }}
+              </option>
+            </select>
+          </td>
+          <td></td>
+          <td
+            *ngFor="let column of dataEntryColumns"
+            [class.d-none]="!column.visible || hideMAColumns"
+          ></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td *ngFor="let column of rulesetColumns" class="results"></td>
+        </tr>
       </ng-container>
+      <tr>
+        <th scope="row">
+          <a class="btn btn-primary" (click)="addStock()">+</a>
+        </th>
+        <td>
+          <span class="form-group" style="display: inline-block">
+            <input
+              id="stockname"
+              name="stockname"
+              style="display: inline-block"
+              type="text"
+              placeholder="Stock name"
+              class="form-control input-md"
+              (keyup)="updateCurrentName($event)"
+            />
+          </span>
+        </td>
+        <td>
+          <span class="form-group">
+            <input
+              id="stockticker"
+              name="stockticker"
+              type="text"
+              placeholder="Stock ticker"
+              class="form-control input-md"
+              (keyup)="updateCurrentTicker($event)"
+            />
+          </span>
+        </td>
+        <td>
+          <select class="form-control" (change)="updateCurrentSector($event)">
+            <option value="" disabled>Choose a sector</option>
+            <option *ngFor="let sector of getSectors()" [value]="sector">
+              {{ enumToString(sector) }}
+            </option>
+          </select>
+        </td>
+        <td>
+          <select class="form-control" (change)="updateCurrentIndustry($event)">
+            <option value="" disabled>Choose an industry</option>
+            <option *ngFor="let industry of getIndustries()" [value]="industry">
+              {{ enumToString(industry) }}
+            </option>
+          </select>
+        </td>
+        <td>
+          <input
+            id="currenttag"
+            type="text"
+            placeholder="Tag"
+            class="col-10 form-control"
+            [value]="currentTag"
+            (keyup)="updateCurrentTag($event)"
+          />
+          <div class="col-2 pl-1">
+            <a class="btn btn-info" (click)="addTag()">+</a>
+          </div>
+
+          <shared-closable-tag
+            class="col-12 py-3"
+            [tags]="toTags()"
+            (change)="updateTags($event)"
+          ></shared-closable-tag>
+        </td>
+        <td></td>
+        <td></td>
+        <td
+          *ngFor="let column of dataEntryColumns"
+          [class.d-none]="!column.visible || hideMAColumns"
+        ></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td *ngFor="let column of rulesetColumns" class="results"></td>
+      </tr>
     </tbody>
   </table>
 </div>
