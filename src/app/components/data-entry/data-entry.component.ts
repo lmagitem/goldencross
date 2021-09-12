@@ -34,10 +34,10 @@ import { periodsToAnalyze } from 'src/app/shared/others/periods-to-analyze';
 import { Period } from 'src/app/shared/models/period.model';
 import { StringableKeyValuePair } from 'src/app/shared/models/stringable-key-value-pair.model';
 import { DataProcessingService } from 'src/app/services/data-processing/data-processing.service';
-import { number, string, e } from 'mathjs';
 import { ConfirmModalComponent } from 'src/app/shared/components/confirm-modal/confirm-modal.component';
 import { ModalUtils } from 'src/app/shared/utils/modal.utils';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { MathUtils } from 'src/app/shared/utils/math.utils';
 
 /** Empty stock used to add new ones. */
 const EMPTY_STOCK = {
@@ -249,7 +249,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
           this.priceDisplayService.getPriceAppreciation(
             n,
             (period.priceSixMonths + period.priceTwoYears) / 2,
-            period.previousHigh,
+            period.priceBefore,
             period.lowest
           )
       );
@@ -261,16 +261,35 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   /** Returns a displayable version of the analysis results corresponding to the given data. */
   public getAnalysisResults(
     stock: Stock,
-    period: AnalysedPeriod,
+    period: AnalysedPeriod | 'all',
     ruleset: Ruleset
   ): string {
-    const results = this.analysisService.processDataWithRuleset(
-      stock,
-      period,
-      ruleset
-    );
-    this.loggingService.log(LogType.ANALYSIS_PROCESS, results.log);
-    return this.priceDisplayService.getAnalysisResultsWithClass(results);
+    if (period === 'all') {
+      const result =
+        stock.analyzedPeriods
+          .map((p) => {
+            const results = this.analysisService.processDataWithRuleset(
+              stock,
+              p,
+              ruleset
+            );
+            this.loggingService.log(LogType.ANALYSIS_PROCESS, results.log);
+            return results.gainsAfterTwoYears;
+          })
+          .reduce((a, b) => a + b, 0) / stock.analyzedPeriods.length;
+
+      return MathUtils.isNumeric(result)
+        ? this.priceDisplayService.getGrowthPercentageWithClass(result)
+        : '';
+    } else {
+      const results = this.analysisService.processDataWithRuleset(
+        stock,
+        period,
+        ruleset
+      );
+      this.loggingService.log(LogType.ANALYSIS_PROCESS, results.log);
+      return this.priceDisplayService.getAnalysisResultsWithClass(results);
+    }
   }
 
   /** Returns a simple formatted date. */
@@ -433,15 +452,33 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     return (Math.round(n * 100) / 100).toFixed(2);
   }
 
-  /** Format number to two digits for display in the table. */
-  public getGrowthWithClass(n: number): string {
-    return this.priceDisplayService.getGrowthPercentageWithClass(n);
+  /** Format growth percentage for display in the table. */
+  public getGrowthWithClass(o: number | Stock): string {
+    if (typeof o === 'number') {
+      return this.priceDisplayService.getGrowthPercentageWithClass(o);
+    } else {
+      const n =
+        o.analyzedPeriods
+          ?.map((p) => p.periodGrowth)
+          .reduce((a, b) => a + b, 0) / o.analyzedPeriods.length;
+      return MathUtils.isNumeric(n)
+        ? this.priceDisplayService.getGrowthPercentageWithClass(n)
+        : '';
+    }
+  }
+
+  /** Format number and growth percentage for display in the table. */
+  public getPriceAndGrowthWithClass(previous: number, current: number): string {
+    return this.priceDisplayService.getPriceAndGrowthPercentageWithClass(
+      previous,
+      current
+    );
   }
 
   /** Returns a somewhat readable string from an enum value. */
-  public enumToString(e: any): string {
+  public enumToString(o: any): string {
     const s = (
-      StringUtils.replaceAll(e + '', '_', ' ') as string
+      StringUtils.replaceAll(o + '', '_', ' ') as string
     ).toLowerCase();
     return s.charAt(0).toUpperCase() + s.substring(1);
   }

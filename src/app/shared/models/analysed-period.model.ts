@@ -8,7 +8,7 @@ export interface AnalysedPeriod {
   stock: string;
   priceHistory: Array<EndOfDayPrice>;
   crossings: Array<PriceAtCrossing>;
-  previousHigh: number;
+  priceBefore: number;
   lowest: number;
   periodGrowth: number;
   priceSixMonths: number;

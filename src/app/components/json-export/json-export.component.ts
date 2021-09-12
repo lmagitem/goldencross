@@ -20,9 +20,11 @@ export class JsonExportComponent implements OnInit, OnDestroy {
   /** A copy of the data found in stateService, used to prepare the json to display. */
   private apiToken: string = '';
   /** A copy of the data found in stateService, used to prepare the json to display. */
-  private rows: Array<Stock> = [];
+  private stocks: Array<Stock> = [];
   /** A copy of the data found in stateService, used to prepare the json to display. */
   private rulesets: Array<Ruleset> = [];
+  /** The json to store. */
+  private jsonState = '';
   /** The json to display. */
   jsonContent = '';
 
@@ -33,8 +35,6 @@ export class JsonExportComponent implements OnInit, OnDestroy {
 
   /** When the data changes, make a local copy and update the json to display. */
   public ngOnInit(): void {
-    this.stateService.restoreState();
-
     this.subs.sink = combineLatest([
       this.stateService.apiToken$,
       this.stateService.stocks$,
@@ -43,16 +43,15 @@ export class JsonExportComponent implements OnInit, OnDestroy {
       .pipe(
         map((results) => ({
           apiToken: results[0],
-          rows: results[1],
+          stocks: results[1],
           rulesets: results[2],
         }))
       )
       .pipe(delay(150))
-      .subscribe((results: { apiToken: any; rows: any; rulesets: any }) => {
+      .subscribe((results: { apiToken: any; stocks: any; rulesets: any }) => {
         this.apiToken = results.apiToken;
-        this.rows = results.rows;
+        this.stocks = results.stocks;
         this.rulesets = results.rulesets;
-        this.updateContent();
       });
   }
 
@@ -65,7 +64,7 @@ export class JsonExportComponent implements OnInit, OnDestroy {
   public updateContent(): void {
     this.jsonContent = JSON.stringify({
       apiToken: this.apiToken,
-      rows: this.rows,
+      stocks: this.stocks,
       rulesets: this.rulesets,
     });
 
@@ -78,14 +77,16 @@ export class JsonExportComponent implements OnInit, OnDestroy {
 
   /** When the user types something, if it's a valid piece of json, send it forward to the data. */
   public onChange(content: any) {
-    const json = content.target?.value
+    this.jsonState = content.target?.value
       ? content.target.value
       : this.jsonContent;
+  }
 
-    // Check if valid json
+  /** Checks if the data to import is a valid json string, and updates the app data. */
+  public import() {
     if (
       /^[\],:{}\s]*$/.test(
-        json
+        this.jsonState
           .replace(/\\["\\\/bfnrtu]/g, '@')
           .replace(
             /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
@@ -94,7 +95,7 @@ export class JsonExportComponent implements OnInit, OnDestroy {
           .replace(/(?:^|:|,)(?:\s*\[)+/g, '')
       )
     ) {
-      this.stateService.updateDataFromJson(json);
+      this.stateService.updateDataFromJson(this.jsonState);
     }
   }
 }

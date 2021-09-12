@@ -1,14 +1,18 @@
 import { Injectable } from '@angular/core';
+import { MathUtils } from 'src/app/shared/utils/math.utils';
 import { Timescale } from '../../shared/enums/timescale.enum';
 import { AnalysisResults } from '../../shared/models/analysis-results.model';
 import { CrossingType } from '../../shared/models/crossing-type.model';
 import { PriceAtCrossing } from '../../shared/models/golden-cross.model';
+import { PriceService } from '../price/price.service';
 
 /** Methods to manage how are prices displayed in the app. */
 @Injectable({
   providedIn: 'root',
 })
 export class PriceDisplayService {
+  constructor(private priceService: PriceService) {}
+
   /** Returns a timestamp formatted to display, with more or less infos depending on the timescale. */
   public getPriceTimestamp(
     timestamp: Date,
@@ -98,7 +102,7 @@ export class PriceDisplayService {
     return (
       '<span class="' +
       this.getPriceClass(getPriceAppreciationScore(goldenCross.price)) +
-      '">' +
+      ' bigger">' +
       (Math.round(goldenCross.price * 100) / 100).toFixed(2) +
       '</span><br>' +
       this.getPriceTimestamp(goldenCross.timestamp, goldenCross.timescale)
@@ -117,12 +121,31 @@ export class PriceDisplayService {
     );
   }
 
+  /** Returns a string usable in html to display a number followed by its growth percentage with proper formatting. */
+  public getPriceAndGrowthPercentageWithClass(
+    previous: number,
+    current: number
+  ) {
+    const growth = this.priceService.calculateGrowth(previous, current);
+    return (
+      '<span class="bigger">' +
+      current +
+      '</span><br>' +
+      '<span class="' +
+      this.getPriceClass(this.getGrowthScore(growth)) +
+      '">' +
+      (growth >= 0 ? '+' : '') +
+      Math.round(growth * 10000) / 100 +
+      '%</span>'
+    );
+  }
+
   /** Returns a string usable in html to display a growth percentage with proper formatting. */
   public getGrowthPercentageWithClass(growth: number) {
     return (
       '<span class="' +
       this.getPriceClass(this.getGrowthScore(growth)) +
-      '">' +
+      ' bigger">' +
       (growth >= 0 ? '+' : '') +
       Math.round(growth * 10000) / 100 +
       '%</span>'

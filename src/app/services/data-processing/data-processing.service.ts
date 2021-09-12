@@ -97,7 +97,7 @@ export class DataProcessingService {
             if (oldAnlzdPeriod !== undefined) {
               oldAnlzdPeriod.crossings = anlzdPeriod.crossings;
               oldAnlzdPeriod.lowest = anlzdPeriod.lowest;
-              oldAnlzdPeriod.previousHigh = anlzdPeriod.previousHigh;
+              oldAnlzdPeriod.priceBefore = anlzdPeriod.priceBefore;
               oldAnlzdPeriod.priceHistory = anlzdPeriod.priceHistory;
               oldAnlzdPeriod.priceSixMonths = anlzdPeriod.priceSixMonths;
               oldAnlzdPeriod.priceTwoYears = anlzdPeriod.priceTwoYears;
@@ -245,10 +245,10 @@ export class DataProcessingService {
           );
 
           // Calculate period data (high, low...)
-          let previousHigh = MathUtils.roundTwoDecimal(
+          let priceBefore = MathUtils.roundTwoDecimal(
             this.movingAverageService.getMAPrice(
               DateUtils.deltaDateWithTradingDays(period.startDate, 0, 0, -1),
-              10,
+              5,
               priceHistory
             ) || 0
           );
@@ -279,7 +279,7 @@ export class DataProcessingService {
           let priceSixMonths = MathUtils.roundTwoDecimal(
             this.movingAverageService.getMAPrice(
               DateUtils.deltaDateWithTradingDays(period.endDate, 0, 6, 0),
-              10,
+              5,
               priceHistory
             ) || 0
           );
@@ -287,14 +287,14 @@ export class DataProcessingService {
           let priceTwoYears = MathUtils.roundTwoDecimal(
             this.movingAverageService.getMAPrice(
               DateUtils.deltaDateWithTradingDays(period.endDate, 2, 0, 0),
-              10,
+              5,
               priceHistory
             ) || 0
           );
 
           this.loggingService.log(
             LogType.DATA_PROCESSING,
-            `${stock.name} - ${period.name}: previousHigh: ${previousHigh}, lowest: ${lowest}, periodGrowth: ${periodGrowth}, priceSixMonths: ${priceSixMonths}, priceTwoYears: ${priceTwoYears}.`
+            `${stock.name} - ${period.name}: priceBefore: ${priceBefore}, lowest: ${lowest}, periodGrowth: ${periodGrowth}, priceSixMonths: ${priceSixMonths}, priceTwoYears: ${priceTwoYears}.`
           );
 
           // Calculate moving averages
@@ -340,7 +340,7 @@ export class DataProcessingService {
             stock: stock.name,
             priceHistory,
             crossings,
-            previousHigh,
+            priceBefore,
             lowest,
             periodGrowth,
             priceSixMonths,

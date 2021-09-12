@@ -41,43 +41,43 @@ input {
 
 .neg-price {
   color: #c21e1e;
-  font-size: 1.1em;
+  font-weight: 800;
   text-shadow: rgb(255, 255, 255) 0px 0px 3px;
 }
 
 .neutral-price {
   color: #cf5c0f;
-  font-size: 1.1em;
+  font-weight: 800;
   text-shadow: rgb(255, 255, 255) 0px 0px 3px;
 }
 
 .pos-one-price {
   color: #bd911a;
-  font-size: 1.1em;
+  font-weight: 800;
   text-shadow: rgb(255, 255, 255) 0px 0px 3px;
 }
 
 .pos-two-price {
   color: #a2a513;
-  font-size: 1.1em;
+  font-weight: 800;
   text-shadow: rgb(255, 255, 255) 0px 0px 3px;
 }
 
 .pos-three-price {
   color: #73ac09;
-  font-size: 1.1em;
+  font-weight: 800;
   text-shadow: rgb(255, 255, 255) 0px 0px 3px;
 }
 
 .pos-four-price {
   color: #2ab300;
-  font-size: 1.1em;
+  font-weight: 800;
   text-shadow: rgb(255, 255, 255) 0px 0px 3px;
 }
 
 .pos-five-price {
   color: #00b60f;
-  font-size: 1.1em;
+  font-weight: 800;
   text-shadow: rgb(255, 255, 255) 0px 0px 3px;
 }
 
@@ -107,6 +107,14 @@ input {
 
 .smaller {
   font-size: 0.8em;
+}
+
+.keep-size {
+  font-size: 1em;
+}
+
+.bigger {
+  font-size: 1.1em;
 }
 
 .nav-item {

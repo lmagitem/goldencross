@@ -28,7 +28,7 @@
           sortable="sector"
           (sort)="onSort($event)"
           placement="top"
-          ngbTooltip="Click here to sort by sector"
+          ngbTooltip="Click here to sort by stocks GICS sector"
           container="body"
         >
           Sector
@@ -38,152 +38,113 @@
           sortable="industry"
           (sort)="onSort($event)"
           placement="top"
-          ngbTooltip="Click here to sort by industry"
+          ngbTooltip="Click here to sort by stocks GICS industry"
           container="body"
         >
           Industry
         </th>
-        <th scope="col">Tags</th>
-        <th scope="col">Period</th>
-        <th scope="col">Prev. high</th>
         <th
-          *ngFor="let column of dataEntryColumns"
           scope="col"
           placement="top"
-          ngbTooltip="Click here to hide that column"
+          ngbTooltip="User defined tags for the stocks"
           container="body"
-          class="sortable"
-          [class.d-none]="!column.visible || hideMAColumns"
-          [innerHTML]="column.name"
-          (click)="column.visible = !column.visible"
-        ></th>
-        <th scope="col">Lowest</th>
-        <th scope="col">Period growth</th>
-        <th scope="col">+6M Price</th>
-        <th scope="col">+2Y Price</th>
-        <th scope="col" *ngFor="let column of rulesetColumns">
+        >
+          Tags
+        </th>
+        <th
+          scope="col"
+          placement="top"
+          ngbTooltip="The name of the analyzed period"
+          container="body"
+        >
+          Period
+        </th>
+        <th
+          scope="col"
+          placement="bottom"
+          ngbTooltip="The price at which the stock traded just before the beggining of this period (smoothed using a 5 days moving average)"
+          container="body"
+        >
+          Price before
+        </th>
+        <ng-container *ngIf="!hideMAColumns">
+          <th
+            *ngFor="let column of dataEntryColumns"
+            scope="col"
+            placement="top"
+            ngbTooltip="Click here to hide that column"
+            container="body"
+            class="sortable"
+            [class.d-none]="!column.visible || hideMAColumns"
+            [innerHTML]="column.name"
+            (click)="column.visible = !column.visible"
+          ></th
+        ></ng-container>
+        <th
+          scope="col"
+          placement="bottom"
+          ngbTooltip="The lowest closing price for that period, followed by the percentage of loss from the 'Price before'"
+          container="body"
+        >
+          Lowest
+        </th>
+        <th
+          scope="col"
+          placement="bottom"
+          ngbTooltip="The price the stock reached 6 calendar months after the last day of the period (smoothed using a 5 days moving average), followed by the percentage of growth from the 'Price before'"
+          container="body"
+        >
+          +6M Price
+        </th>
+        <th
+          scope="col"
+          placement="bottom"
+          ngbTooltip="The price the stock reached 2 calendar years after the last day of the period (smoothed using a 5 days moving average), followed by the percentage of loss from the 'Price before'"
+          container="body"
+        >
+          +2Y Price
+        </th>
+        <th
+          scope="col"
+          placement="bottom"
+          ngbTooltip="The growth percentage of the stock between the start and the end of the period (smoothed using a 5 days moving average)"
+          container="body"
+        >
+          Period growth
+        </th>
+        <th
+          scope="col"
+          placement="bottom"
+          ngbTooltip="The result of the period analysis using the ruleset {{
+            column.ruleset.name
+          }} - are displayed the growth factor between the cost average of the simulated entry and the '+2Y Price', the cost average of the simulated entry, and the percentage of allocated capital used"
+          container="body"
+          *ngFor="let column of rulesetColumns"
+        >
           {{ column.ruleset.name }}
         </th>
       </tr>
     </thead>
     <tbody>
       <ng-container *ngFor="let stock of sortedStocks">
-        <tr
-          *ngFor="
-            let anlzdPeriod of stock.analyzedPeriods;
-            let periodIndex = index
-          "
-        >
-          <th scope="row">
-            <span *ngIf="periodIndex === 0"
-              ><a class="btn btn-danger" (click)="removeStock(stock)">🗑</a
-              ><a
-                class="btn btn-secondary"
-                (click)="updatePeriod(anlzdPeriod, stock)"
-                >📡</a
-              ></span
-            ><a class="btn btn-dark" (click)="removePeriod(anlzdPeriod, stock)"
-              >-</a
-            >
-          </th>
-          <td [class.faded]="periodIndex !== 0">
-            {{ stock.name }}
-          </td>
-          <td [class.faded]="periodIndex !== 0">
-            {{ stock.ticker }}
-          </td>
-          <td [class.faded]="periodIndex !== 0">
-            {{ enumToString(stock.sector) }}
-          </td>
-          <td [class.faded]="periodIndex !== 0">
-            {{ enumToString(stock.industry) }}
-          </td>
-          <td [class.faded]="periodIndex !== 0">
-            <span *ngFor="let tag of stock.tags; let tagN = index">{{
-              tagN > 0 ? ", " + tag : tag
-            }}</span>
-          </td>
-          <td
-            [class.not-filled]="
-              anlzdPeriod.previousHigh === undefined ||
-              anlzdPeriod.previousHigh === null ||
-              anlzdPeriod.previousHigh <= 0
-            "
-            placement="top"
-            ngbTooltip="{{ anlzdPeriod.period.name }} starts on {{
-              formatDate(anlzdPeriod.period.startDate)
-            }} and ends on {{
-              formatDate(anlzdPeriod.period.endDate)
-            }}, with an average yearly inflation of {{
-              anlzdPeriod.period.yearlyInflation
-            }} during that time."
-            container="body"
-          >
-            {{ anlzdPeriod.period.name }}
-          </td>
-          <td>{{ formatToTwoDigits(anlzdPeriod.previousHigh) }}</td>
-          <td
-            *ngFor="let column of dataEntryColumns"
-            [class.d-none]="!column.visible || hideMAColumns"
-            [innerHTML]="getCrossing(column.index, column.type, anlzdPeriod)"
-          ></td>
-          <td>{{ formatToTwoDigits(anlzdPeriod.lowest) }}</td>
-          <td [innerHTML]="getGrowthWithClass(anlzdPeriod.periodGrowth)"></td>
-          <td>{{ formatToTwoDigits(anlzdPeriod.priceSixMonths) }}</td>
-          <td>{{ formatToTwoDigits(anlzdPeriod.priceTwoYears) }}</td>
-          <td
-            *ngFor="let column of rulesetColumns"
-            class="results"
-            [innerHTML]="getAnalysisResults(stock, anlzdPeriod, column.ruleset)"
-          ></td>
-        </tr>
         <tr>
           <th scope="row">
-            <span
-              *ngIf="!stock.analyzedPeriods || stock.analyzedPeriods.length < 1"
-              ><a class="btn btn-danger" (click)="removeStock(stock)">🗑</a
-              ><a class="btn btn-dark" (click)="addPeriod(stock)">+</a></span
-            >
-            <span
-              *ngIf="
-                !!stock.analyzedPeriods && stock.analyzedPeriods.length > 0
-              "
-              ><a class="btn btn-dark" (click)="addPeriod(stock)">+</a></span
-            >
+            <a class="btn btn-danger" (click)="removeStock(stock)">🗑</a
+            ><a class="btn btn-dark" (click)="addPeriod(stock)">+</a>
           </th>
-          <td
-            [class.faded]="
-              !!stock.analyzedPeriods && stock.analyzedPeriods.length > 0
-            "
-          >
+          <td>
             {{ stock.name }}
           </td>
-          <td
-            [class.faded]="
-              !!stock.analyzedPeriods && stock.analyzedPeriods.length > 0
-            "
-          >
+          <td>
             {{ stock.ticker }}
           </td>
-          <td
-            [class.faded]="
-              !!stock.analyzedPeriods && stock.analyzedPeriods.length > 0
-            "
-          >
+          <td>
             {{ enumToString(stock.sector) }}
           </td>
-          <td
-            [class.faded]="
-              !!stock.analyzedPeriods && stock.analyzedPeriods.length > 0
-            "
-          >
+          <td>
             {{ enumToString(stock.industry) }}
           </td>
-          <td
-            [class.faded]="
-              !!stock.analyzedPeriods && stock.analyzedPeriods.length > 0
-            "
-          >
+          <td>
             <span *ngFor="let tag of stock.tags; let tagN = index">{{
               tagN > 0 ? ", " + tag : tag
             }}</span>
@@ -194,27 +155,128 @@
               (change)="selectCurrentPeriod(stock, $event)"
             >
               <option value="" disabled>Choose a period</option>
-              <option value="all" [disabled]="getPeriods(stock).length < 2">
-                Add all
-              </option>
               <option
                 *ngFor="let period of getPeriods(stock)"
                 [value]="period.name"
               >
                 {{ period.name }}
               </option>
+              <option value="all" [disabled]="getPeriods(stock).length < 2">
+                Add all
+              </option>
             </select>
           </td>
           <td></td>
+          <ng-container *ngIf="!hideMAColumns">
+            <td
+              *ngFor="let column of dataEntryColumns"
+              [class.d-none]="!column.visible"
+            ></td
+          ></ng-container>
+          <td></td>
+          <td></td>
+          <td></td>
           <td
-            *ngFor="let column of dataEntryColumns"
-            [class.d-none]="!column.visible || hideMAColumns"
+            class="global-results"
+            [innerHTML]="getGrowthWithClass(stock)"
           ></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td *ngFor="let column of rulesetColumns" class="results"></td>
+          <td
+            *ngFor="let column of rulesetColumns"
+            class="global-results"
+            [innerHTML]="getAnalysisResults(stock, 'all', column.ruleset)"
+          ></td>
+        </tr>
+        <tr
+          *ngFor="
+            let anlzdPeriod of stock.analyzedPeriods;
+            let periodIndex = index
+          "
+        >
+          <th scope="row">
+            <a
+              class="btn btn-secondary"
+              (click)="updatePeriod(anlzdPeriod, stock)"
+              >📡</a
+            >
+            <a class="btn btn-dark" (click)="removePeriod(anlzdPeriod, stock)"
+              >-</a
+            >
+          </th>
+          <td class="faded">
+            {{ stock.name }}
+          </td>
+          <td class="faded">
+            {{ stock.ticker }}
+          </td>
+          <td class="faded">
+            {{ enumToString(stock.sector) }}
+          </td>
+          <td class="faded">
+            {{ enumToString(stock.industry) }}
+          </td>
+          <td class="faded">
+            <span *ngFor="let tag of stock.tags; let tagN = index">{{
+              tagN > 0 ? ", " + tag : tag
+            }}</span>
+          </td>
+          <td
+            [class.not-filled]="
+              anlzdPeriod.priceBefore === undefined ||
+              anlzdPeriod.priceBefore === null ||
+              anlzdPeriod.priceBefore <= 0
+            "
+            placement="top"
+            ngbTooltip="{{ anlzdPeriod.period.name }} starts on {{
+              formatDate(anlzdPeriod.period.startDate)
+            }} and ends on {{
+              formatDate(anlzdPeriod.period.endDate)
+            }}, with an average yearly inflation of {{
+              anlzdPeriod.period.yearlyInflation
+            }} during that time"
+            container="body"
+          >
+            {{ anlzdPeriod.period.name }}
+          </td>
+          <td class="bigger">
+            {{ formatToTwoDigits(anlzdPeriod.priceBefore) }}
+          </td>
+          <ng-container *ngIf="!hideMAColumns">
+            <td
+              *ngFor="let column of dataEntryColumns"
+              [class.d-none]="!column.visible"
+              [innerHTML]="getCrossing(column.index, column.type, anlzdPeriod)"
+            ></td
+          ></ng-container>
+          <td
+            [innerHTML]="
+              getPriceAndGrowthWithClass(
+                anlzdPeriod.priceBefore,
+                anlzdPeriod.lowest
+              )
+            "
+          ></td>
+          <td
+            [innerHTML]="
+              getPriceAndGrowthWithClass(
+                anlzdPeriod.priceBefore,
+                anlzdPeriod.priceSixMonths
+              )
+            "
+          ></td>
+          <td
+            [innerHTML]="
+              getPriceAndGrowthWithClass(
+                anlzdPeriod.priceBefore,
+                anlzdPeriod.priceTwoYears
+              )
+            "
+          ></td>
+          <td [innerHTML]="getGrowthWithClass(anlzdPeriod.periodGrowth)"></td>
+          <td
+            *ngFor="let column of rulesetColumns"
+            class="results"
+            [innerHTML]="getAnalysisResults(stock, anlzdPeriod, column.ruleset)"
+          ></td>
         </tr>
       </ng-container>
       <tr>
@@ -285,10 +347,12 @@
         </td>
         <td></td>
         <td></td>
-        <td
-          *ngFor="let column of dataEntryColumns"
-          [class.d-none]="!column.visible || hideMAColumns"
-        ></td>
+        <ng-container *ngIf="!hideMAColumns">
+          <td
+            *ngFor="let column of dataEntryColumns"
+            [class.d-none]="!column.visible"
+          ></td
+        ></ng-container>
         <td></td>
         <td></td>
         <td></td>

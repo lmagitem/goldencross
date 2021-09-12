@@ -70,7 +70,7 @@ describe('DataProcessingService', () => {
         expect(JSON.stringify(anlzdPeriod.crossings)).toEqual(
           JSON.stringify(testCrossingResults)
         );
-        expect(anlzdPeriod.previousHigh).toEqual(28.57);
+        expect(anlzdPeriod.priceBefore).toEqual(28.57);
         expect(anlzdPeriod.lowest).toEqual(28.5);
         expect(anlzdPeriod.priceSixMonths).toEqual(53.61);
         expect(anlzdPeriod.priceTwoYears).toEqual(31.33);

@@ -47,7 +47,9 @@ export class StateService {
   constructor(
     private storageService: StorageService,
     private loggingService: LoggingService
-  ) {}
+  ) {
+    this.restoreState();
+  }
 
   /** Updates the data entry table and the rulesets for result display using the json passed in parameter. */
   public updateDataFromJson(json: string): void {

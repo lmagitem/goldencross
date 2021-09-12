@@ -25,10 +25,10 @@ export class AnalysisService {
     ruleset: Ruleset
   ): AnalysisResults {
     const lastOfTypes: Map<CrossingType, number> = new Map();
-    const previousHigh = anlzdPeriod.previousHigh;
+    const priceBefore = anlzdPeriod.priceBefore;
     const priceTwoYears = anlzdPeriod.priceTwoYears;
-    let costAverage = previousHigh;
-    let lastUsed = previousHigh;
+    let costAverage = priceBefore;
+    let lastUsed = priceBefore;
     let gainsAfterTwoYears = 0;
     let usedCapital = 0;
     let lastBuy: Date | undefined = undefined;
@@ -68,7 +68,7 @@ export class AnalysisService {
                   this.getFormula(
                     rule,
                     costAverage,
-                    previousHigh,
+                    priceBefore,
                     lastUsed,
                     lastOfTypes,
                     crossing
@@ -134,7 +134,7 @@ export class AnalysisService {
   private getFormula(
     rule: Rule,
     costAverage: number,
-    previousHigh: number,
+    priceBefore: number,
     lastUsed: number,
     lastOfTypes: Map<CrossingType, number>,
     crossing: PriceAtCrossing
@@ -143,14 +143,14 @@ export class AnalysisService {
       lastOfTypes.get(crossing.type)
     )
       ? (lastOfTypes.get(crossing.type) as number)
-      : previousHigh;
+      : priceBefore;
 
     let formula = rule.formula;
     formula = StringUtils.replaceAll(formula, 'avg', costAverage);
     formula = StringUtils.replaceAll(formula, 'last-used', lastUsed);
     formula = StringUtils.replaceAll(formula, 'last-of-type', lastOfType);
     formula = StringUtils.replaceAll(formula, 'curr', crossing.price);
-    formula = StringUtils.replaceAll(formula, 'prev-high', previousHigh);
+    formula = StringUtils.replaceAll(formula, 'prev-high', priceBefore);
     return formula;
   }
 }
