@@ -77,4 +77,33 @@ export class PriceService {
         )
       : -1;
   }
+
+  /** Calculates the growth between a first value and a later one. */
+  public calculateGrowth(previous: number, current: number): number {
+    if (previous <= 0 && current >= 0) {
+      return (current - previous) / Math.abs(previous);
+    } else if (previous <= 0 && previous <= current) {
+      return (Math.abs(current) - Math.abs(previous)) / previous;
+    } else if (previous >= 0 && current <= 0) {
+      return (current - previous) / previous;
+    } else if (previous >= 0 && current >= 0) {
+      return (current - previous) / previous;
+    } else if (previous <= 0 && previous >= current) {
+      return (Math.abs(current) - Math.abs(previous)) / previous;
+    } else if (previous <= current) {
+      return (current - previous) / current;
+    } else {
+      return -((previous - current) / previous);
+    }
+  }
+
+  /** Returns the lowest closing price between two given dates. */
+  public getGrowth(start: Date, end: Date, data: EndOfDayPrice[]): number {
+    data = this.returnPricesBetweenDates(start, end, data);
+    return data.length > 0
+      ? MathUtils.roundTwoDecimal(
+          data.reduce((a, b) => (a.low <= b.low ? a : b)).low
+        )
+      : -1;
+  }
 }

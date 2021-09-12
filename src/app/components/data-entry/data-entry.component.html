@@ -58,6 +58,7 @@
           (click)="column.visible = !column.visible"
         ></th>
         <th scope="col">Lowest</th>
+        <th scope="col">Period growth</th>
         <th scope="col">+6M Price</th>
         <th scope="col">+2Y Price</th>
         <th scope="col" *ngFor="let column of rulesetColumns">
@@ -108,6 +109,15 @@
               anlzdPeriod.previousHigh === null ||
               anlzdPeriod.previousHigh <= 0
             "
+            placement="top"
+            ngbTooltip="{{ anlzdPeriod.period.name }} starts on {{
+              formatDate(anlzdPeriod.period.startDate)
+            }} and ends on {{
+              formatDate(anlzdPeriod.period.endDate)
+            }}, with an average yearly inflation of {{
+              anlzdPeriod.period.yearlyInflation
+            }} during that time."
+            container="body"
           >
             {{ anlzdPeriod.period.name }}
           </td>
@@ -118,6 +128,7 @@
             [innerHTML]="getCrossing(column.index, column.type, anlzdPeriod)"
           ></td>
           <td>{{ formatToTwoDigits(anlzdPeriod.lowest) }}</td>
+          <td [innerHTML]="getGrowthWithClass(anlzdPeriod.periodGrowth)"></td>
           <td>{{ formatToTwoDigits(anlzdPeriod.priceSixMonths) }}</td>
           <td>{{ formatToTwoDigits(anlzdPeriod.priceTwoYears) }}</td>
           <td
@@ -202,6 +213,7 @@
           <td></td>
           <td></td>
           <td></td>
+          <td></td>
           <td *ngFor="let column of rulesetColumns" class="results"></td>
         </tr>
       </ng-container>
@@ -277,6 +289,7 @@
           *ngFor="let column of dataEntryColumns"
           [class.d-none]="!column.visible || hideMAColumns"
         ></td>
+        <td></td>
         <td></td>
         <td></td>
         <td></td>

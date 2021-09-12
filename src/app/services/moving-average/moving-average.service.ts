@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
+import { LogType } from 'src/app/shared/enums/log-type.enum';
 import { Timescale } from 'src/app/shared/enums/timescale.enum';
 import { CrossingType } from 'src/app/shared/models/crossing-type.model';
 import { EndOfDayPrice } from 'src/app/shared/models/end-of-day-price.model';
 import { PriceAtCrossing } from 'src/app/shared/models/golden-cross.model';
 import { DateUtils } from 'src/app/shared/utils/date.utils';
 import { MathUtils } from 'src/app/shared/utils/math.utils';
+import { LoggingService } from '../logging/logging.service';
 import { PriceService } from '../price/price.service';
 
 /** Methods used to calculate Moving Averages and Crosses between MA. */
@@ -12,7 +14,10 @@ import { PriceService } from '../price/price.service';
   providedIn: 'root',
 })
 export class MovingAverageService {
-  constructor(private priceService: PriceService) {}
+  constructor(
+    private loggingService: LoggingService,
+    private priceService: PriceService
+  ) {}
 
   /** Calculates the queried Moving Average price at the given date. */
   public getMAPrice(
@@ -56,6 +61,15 @@ export class MovingAverageService {
       -1
     );
 
+    this.loggingService.log(
+      LogType.DATA_PROCESSING,
+      `Trying to find crossings from date ${new Date(
+        startDate
+      ).toJSON()}, searching for those ones: ${JSON.stringify(
+        possibleCrossings
+      )}.`
+    );
+
     // For each EoDPrice, check if a lower MA goes above a higher MA in comparison of the last EoDPrice
     let previousEoD: EndOfDayPrice;
     let previousHashMap: Map<number, number | undefined>;
@@ -74,13 +88,24 @@ export class MovingAverageService {
         previousHashMap = new Map(
           eodp.movingAveragePrices.map((obj) => [obj.movingAverage, obj.price])
         );
+
+        this.loggingService.log(
+          LogType.DATA_PROCESSING,
+          `The first entry will be at date ${new Date(eodp.date).toJSON()}.`
+        );
       } else if (
         eodp.movingAveragePrices !== undefined &&
         eodp.movingAveragePrices.length > 0 &&
-        new Date(eodp.date).getFullYear() >=
-          dayPreviousStartDate.getFullYear() &&
-        new Date(eodp.date).getMonth() >= dayPreviousStartDate.getMonth() &&
-        new Date(eodp.date).getDate() >= dayPreviousStartDate.getDate()
+        (new Date(eodp.date).getFullYear() >
+          dayPreviousStartDate.getFullYear() ||
+          (new Date(eodp.date).getFullYear() ===
+            dayPreviousStartDate.getFullYear() &&
+            new Date(eodp.date).getMonth() > dayPreviousStartDate.getMonth()) ||
+          (new Date(eodp.date).getFullYear() ===
+            dayPreviousStartDate.getFullYear() &&
+            new Date(eodp.date).getMonth() ===
+              dayPreviousStartDate.getMonth() &&
+            new Date(eodp.date).getDate() > dayPreviousStartDate.getDate()))
       ) {
         // List all the prices in a easily usable map
         const hashMap = new Map(

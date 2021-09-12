@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { first } from 'rxjs/operators';
+import { LogType } from 'src/app/shared/enums/log-type.enum';
 import { AnalysedPeriod } from 'src/app/shared/models/analysed-period.model';
 import { CrossingType } from 'src/app/shared/models/crossing-type.model';
 import { PriceAtCrossing } from 'src/app/shared/models/golden-cross.model';
@@ -9,6 +10,7 @@ import { Stock } from 'src/app/shared/models/stock.model';
 import { TickerInfos } from 'src/app/shared/models/ticker-infos.model';
 import { DateUtils } from 'src/app/shared/utils/date.utils';
 import { MathUtils } from 'src/app/shared/utils/math.utils';
+import { LoggingService } from '../logging/logging.service';
 import { MovingAverageService } from '../moving-average/moving-average.service';
 import { PriceService } from '../price/price.service';
 import { StateService } from '../state/state.service';
@@ -22,6 +24,7 @@ export class DataProcessingService {
   constructor(
     private tiingoService: TiingoRequestService,
     private movingAverageService: MovingAverageService,
+    private loggingService: LoggingService,
     private priceService: PriceService,
     private stateService: StateService
   ) {}
@@ -37,6 +40,13 @@ export class DataProcessingService {
           const infos = response.body;
           if (infos !== undefined && infos !== null) {
             stock.infos = infos;
+            stock.name = stock.name === '' ? infos.name : stock.name;
+
+            this.loggingService.log(
+              LogType.DATA_PROCESSING,
+              `${stock.name}: Just retreived infos from Tiingo.`
+            );
+
             if (
               periods !== undefined &&
               periods !== null &&
@@ -115,6 +125,11 @@ export class DataProcessingService {
     rulesets: Ruleset[]
   ): Promise<AnalysedPeriod> {
     return new Promise<AnalysedPeriod>((resolve, reject) => {
+      this.loggingService.log(
+        LogType.DATA_PROCESSING,
+        `${stock.name} - ${period.name}: Starting to process the period.`
+      );
+
       // Retreive which moving averages we need to keep track of
       const movingAveragesToCalculate: number[] = [];
       const possibleCrossings: CrossingType[] = [];
@@ -139,6 +154,15 @@ export class DataProcessingService {
       );
       const highestMA =
         movingAveragesToCalculate.reduce((a, b) => (a >= b ? a : b), 0) || 200;
+
+      this.loggingService.log(
+        LogType.DATA_PROCESSING,
+        `${stock.name} - ${
+          period.name
+        }: I will process the following MAs: ${JSON.stringify(
+          movingAveragesToCalculate
+        )}.`
+      );
 
       // Calculate the start and end dates of the period to retreive
       const startToRequest = DateUtils.deltaDateWithTradingDays(
@@ -174,8 +198,36 @@ export class DataProcessingService {
           0
         ).getMilliseconds() > startToRequest.getMilliseconds()
       ) {
+        this.loggingService.log(
+          LogType.DATA_PROCESSING,
+          `${stock.name} - ${
+            period.name
+          }: The dates weren't matching. Start of period is ${new Date(
+            period.startDate
+          ).toJSON()} while start of data is ${new Date(
+            tickerInfos.startDate
+          ).toJSON()}, end of period is ${new Date(
+            period.endDate
+          ).toJSON()} while end of data is ${new Date(
+            tickerInfos.endDate
+          ).toJSON()}.`
+        );
+
         reject();
       }
+
+      this.loggingService.log(
+        LogType.DATA_PROCESSING,
+        `${stock.name} - ${
+          period.name
+        }: I'll make a request for data. Start of period is ${new Date(
+          period.startDate
+        ).toJSON()} while requested start is ${new Date(
+          startToRequest
+        ).toJSON()}, end of period is ${new Date(
+          period.endDate
+        ).toJSON()} while requested end is ${new Date(endToRequest).toJSON()}.`
+      );
 
       // Retreive the prices
       this.tiingoService
@@ -187,10 +239,15 @@ export class DataProcessingService {
               ? [...response.body]
               : [];
 
+          this.loggingService.log(
+            LogType.DATA_PROCESSING,
+            `${stock.name} - ${period.name}: I've received ${priceHistory.length} trading days worth of data.`
+          );
+
           // Calculate period data (high, low...)
           let previousHigh = MathUtils.roundTwoDecimal(
             this.movingAverageService.getMAPrice(
-              DateUtils.deltaDateWithTradingDays(startToRequest, -1, 0, 0),
+              DateUtils.deltaDateWithTradingDays(period.startDate, 0, 0, -1),
               10,
               priceHistory
             ) || 0
@@ -204,9 +261,24 @@ export class DataProcessingService {
             )
           );
 
+          let periodGrowth = MathUtils.roundFourDecimal(
+            this.priceService.calculateGrowth(
+              this.movingAverageService.getMAPrice(
+                DateUtils.deltaDateWithTradingDays(period.startDate, 0, 0, -1),
+                5,
+                priceHistory
+              ) || 0,
+              this.movingAverageService.getMAPrice(
+                period.endDate,
+                5,
+                priceHistory
+              ) || 0
+            )
+          );
+
           let priceSixMonths = MathUtils.roundTwoDecimal(
             this.movingAverageService.getMAPrice(
-              DateUtils.deltaDateWithTradingDays(startToRequest, 0, 6, 0),
+              DateUtils.deltaDateWithTradingDays(period.endDate, 0, 6, 0),
               10,
               priceHistory
             ) || 0
@@ -214,10 +286,15 @@ export class DataProcessingService {
 
           let priceTwoYears = MathUtils.roundTwoDecimal(
             this.movingAverageService.getMAPrice(
-              DateUtils.deltaDateWithTradingDays(startToRequest, 2, 0, 0),
+              DateUtils.deltaDateWithTradingDays(period.endDate, 2, 0, 0),
               10,
               priceHistory
             ) || 0
+          );
+
+          this.loggingService.log(
+            LogType.DATA_PROCESSING,
+            `${stock.name} - ${period.name}: previousHigh: ${previousHigh}, lowest: ${lowest}, periodGrowth: ${periodGrowth}, priceSixMonths: ${priceSixMonths}, priceTwoYears: ${priceTwoYears}.`
           );
 
           // Calculate moving averages
@@ -240,6 +317,11 @@ export class DataProcessingService {
             })
           );
 
+          this.loggingService.log(
+            LogType.DATA_PROCESSING,
+            `${stock.name} - ${period.name}: Just finished calculating the moving averages.`
+          );
+
           // Calculate crossings
           const crossings: PriceAtCrossing[] =
             this.movingAverageService.findCrossings(
@@ -248,6 +330,11 @@ export class DataProcessingService {
               period.startDate
             );
 
+          this.loggingService.log(
+            LogType.DATA_PROCESSING,
+            `${stock.name} - ${period.name}: Just finished calculating the crossings. I've found ${crossings.length} distinct ones.`
+          );
+
           resolve({
             period,
             stock: stock.name,
@@ -255,6 +342,7 @@ export class DataProcessingService {
             crossings,
             previousHigh,
             lowest,
+            periodGrowth,
             priceSixMonths,
             priceTwoYears,
           });

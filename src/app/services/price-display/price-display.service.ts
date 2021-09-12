@@ -10,16 +10,19 @@ import { PriceAtCrossing } from '../../shared/models/golden-cross.model';
 })
 export class PriceDisplayService {
   /** Returns a timestamp formatted to display, with more or less infos depending on the timescale. */
-  public getPriceTimestamp(timestamp: Date, timescale: Timescale) {
+  public getPriceTimestamp(
+    timestamp: Date,
+    timescale: Timescale = Timescale.OD
+  ) {
     return timescale === Timescale.FH
-      ? timestamp.toLocaleDateString('en-UK', {
+      ? new Date(timestamp).toLocaleDateString('en-UK', {
           hour: '2-digit',
           minute: '2-digit',
           day: '2-digit',
           month: '2-digit',
           year: '2-digit',
         })
-      : timestamp.toLocaleDateString('en-UK', {
+      : new Date(timestamp).toLocaleDateString('en-UK', {
           day: '2-digit',
           month: '2-digit',
           year: '2-digit',
@@ -87,8 +90,8 @@ export class PriceDisplayService {
       : 200;
   }
 
-  /** Returns a displayable version of the data contained in a {@link GoldenCross}. */
-  public getGoldenCrossWithClass(
+  /** Returns a displayable version of the data contained in a {@link PriceAtCrossing}. */
+  public getCrossingWithClass(
     goldenCross: PriceAtCrossing,
     getPriceAppreciationScore = (n: number) => 0
   ): string {
@@ -105,12 +108,8 @@ export class PriceDisplayService {
   /** Returns a string usable in html to display the given analysis results with proper formatting. */
   public getAnalysisResultsWithClass(results: AnalysisResults): string {
     return (
-      '<span class="' +
-      this.getPriceClass(this.getGrowthScore(results.gainsAfterTwoYears)) +
-      '">' +
-      (results.gainsAfterTwoYears >= 0 ? '+' : '') +
-      Math.round(results.gainsAfterTwoYears * 100) +
-      '%</span><br><span class="smaller">avg: ' +
+      this.getGrowthPercentageWithClass(results.gainsAfterTwoYears) +
+      '<br><span class="smaller">avg: ' +
       results.costAverage +
       '<br>used: ' +
       Math.round(results.usedCapital * 100) +
@@ -118,8 +117,20 @@ export class PriceDisplayService {
     );
   }
 
+  /** Returns a string usable in html to display a growth percentage with proper formatting. */
+  public getGrowthPercentageWithClass(growth: number) {
+    return (
+      '<span class="' +
+      this.getPriceClass(this.getGrowthScore(growth)) +
+      '">' +
+      (growth >= 0 ? '+' : '') +
+      Math.round(growth * 10000) / 100 +
+      '%</span>'
+    );
+  }
+
   /** Returns a string usable in html to display the crossings column headers with pretty colors. */
-  public getCrossingWithClass(type: CrossingType): string {
+  public getMACrossingWithClass(type: CrossingType): string {
     return (
       this.getMAClass(type.fromMA, this.getMAScore(type.fromMA)) +
       '↗️' +

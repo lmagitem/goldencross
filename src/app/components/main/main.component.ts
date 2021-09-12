@@ -20,6 +20,10 @@ export class MainComponent {
   jsonLog =
     initialLoggingStatus.find((o) => o.type === LogType.JSON_PARSING)
       ?.enabled || false;
+  /** Is logging enabled for data processing? */
+  processingLog =
+    initialLoggingStatus.find((o) => o.type === LogType.DATA_PROCESSING)
+      ?.enabled || false;
   /** Is logging enabled for the analysis process? */
   analysisLog =
     initialLoggingStatus.find((o) => o.type === LogType.ANALYSIS_PROCESS)
@@ -49,9 +53,16 @@ export class MainComponent {
   }
 
   /** When the button to enable logging is clicked, enable/disable logging. */
-  public switchLogging(type: 'proc' | 'json') {
+  public switchLogging(type: 'proc' | 'anal' | 'json') {
     switch (type) {
       case 'proc':
+        this.processingLog = !this.processingLog;
+        this.loggingService.enableLog(
+          LogType.DATA_PROCESSING,
+          this.processingLog
+        );
+        break;
+      case 'anal':
         this.analysisLog = !this.analysisLog;
         this.loggingService.enableLog(
           LogType.ANALYSIS_PROCESS,

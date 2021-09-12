@@ -181,7 +181,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
       const columnsForThisType: DataEntryColumn[] = [];
       columnsForThisType.push({
         index: 0,
-        name: this.priceDisplayService.getCrossingWithClass(type) + ' n°1',
+        name: this.priceDisplayService.getMACrossingWithClass(type) + ' n°1',
         type,
         visible: true,
       });
@@ -204,7 +204,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
               columnsForThisType.push({
                 index: columnsForThisType.length,
                 name:
-                  this.priceDisplayService.getCrossingWithClass(type) +
+                  this.priceDisplayService.getMACrossingWithClass(type) +
                   ' n°' +
                   (i + 1),
                 type,
@@ -243,7 +243,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
 
     // Then if there are indeed some to display, get the one corresponding to the required column
     if (crossings.length > index) {
-      return this.priceDisplayService.getGoldenCrossWithClass(
+      return this.priceDisplayService.getCrossingWithClass(
         PriceAtCrossing.getInstance(crossings[index]),
         (n: number) =>
           this.priceDisplayService.getPriceAppreciation(
@@ -271,6 +271,11 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     );
     this.loggingService.log(LogType.ANALYSIS_PROCESS, results.log);
     return this.priceDisplayService.getAnalysisResultsWithClass(results);
+  }
+
+  /** Returns a simple formatted date. */
+  public formatDate(date: Date): string {
+    return this.priceDisplayService.getPriceTimestamp(date);
   }
 
   /** Updates the new stock's name. */
@@ -428,6 +433,12 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     return (Math.round(n * 100) / 100).toFixed(2);
   }
 
+  /** Format number to two digits for display in the table. */
+  public getGrowthWithClass(n: number): string {
+    return this.priceDisplayService.getGrowthPercentageWithClass(n);
+  }
+
+  /** Returns a somewhat readable string from an enum value. */
   public enumToString(e: any): string {
     const s = (
       StringUtils.replaceAll(e + '', '_', ' ') as string

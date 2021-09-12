@@ -8,12 +8,15 @@ import { Ruleset } from 'src/app/shared/models/ruleset.model';
 import { Stock } from 'src/app/shared/models/stock.model';
 import { MathUtils } from 'src/app/shared/utils/math.utils';
 import { StringUtils } from 'src/app/shared/utils/string.utils';
+import { PriceService } from '../price/price.service';
 
 /** Provides functions to analyse and process price movements. */
 @Injectable({
   providedIn: 'root',
 })
 export class AnalysisService {
+  constructor(private priceService: PriceService) {}
+
   /** After being fed the necessary data, executes the buy strategy represented by the given ruleset.
    *  @description Usable keywords for the formula are: "avg", "last-used", "last-of-type", "curr", "prev-high" */
   public processDataWithRuleset(
@@ -117,13 +120,12 @@ export class AnalysisService {
     }
 
     // And calculates growth percentage before returning the results
-    gainsAfterTwoYears = MathUtils.roundTwoDecimal(
-      priceTwoYears === costAverage
+    gainsAfterTwoYears =
+      usedCapital === 0
         ? 0
-        : priceTwoYears > costAverage
-        ? (priceTwoYears - costAverage) / costAverage
-        : -(costAverage - priceTwoYears) / costAverage
-    );
+        : MathUtils.roundFourDecimal(
+            this.priceService.calculateGrowth(costAverage, priceTwoYears)
+          );
 
     return { costAverage, gainsAfterTwoYears, usedCapital, log };
   }

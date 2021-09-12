@@ -135,7 +135,7 @@ export class RuleEditorComponent implements OnInit, OnDestroy {
         const crossing = array[i].value;
         result.push(
           new StringableKeyValuePair(i, crossing, (data: CrossingType) =>
-            this.priceDisplayService.getCrossingWithClass(data)
+            this.priceDisplayService.getMACrossingWithClass(data)
           )
         );
       }

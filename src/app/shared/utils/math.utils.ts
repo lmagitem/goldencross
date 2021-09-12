@@ -78,4 +78,9 @@ export class MathUtils {
   public static roundTwoDecimal(numberToRound: number): number {
     return Math.round(numberToRound * 100) / 100;
   }
+
+  /** Rounds the given number to two decimals. */
+  public static roundFourDecimal(numberToRound: number): number {
+    return Math.round(numberToRound * 10000) / 10000;
+  }
 }

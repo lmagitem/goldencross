@@ -34,12 +34,22 @@
               >
               <a
                 *ngIf="advancedButtonsEnabled"
+                placement="top"
+                ngbTooltip="Shows data processing logs in your browser console"
+                container="body"
+                class="d-inline btn btn-info m-2 json-width"
+                role="button"
+                (click)="switchLogging('proc')"
+                >Data process logs {{ processingLog ? "on" : "off" }}
+              </a>
+              <a
+                *ngIf="advancedButtonsEnabled"
                 placement="bottom"
                 ngbTooltip="Shows analysis logs in your browser console"
                 container="body"
                 class="d-inline btn btn-info m-2 analysis-width"
                 role="button"
-                (click)="switchLogging('proc')"
+                (click)="switchLogging('anal')"
                 >Analysis logs {{ analysisLog ? "on" : "off" }}
               </a>
             </div>
