@@ -120,3 +120,13 @@ input {
 .nav-item {
   cursor: pointer;
 }
+
+.black > .progress > .progress-bar {
+  color: black;
+  text-shadow: 1px 0px 5px #fff;
+}
+
+.progress-bar {
+  color: white;
+  text-shadow: 1px 0px 5px black;
+}

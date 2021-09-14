@@ -14,6 +14,7 @@ import { RuleEditorComponent } from './components/rule-editor/rule-editor.compon
 import { ClosableTagComponent } from './shared/components/closable-tag/closable-tag.component';
 import { ConfirmModalComponent } from './shared/components/confirm-modal/confirm-modal.component';
 import { HttpClientModule } from '@angular/common/http';
+import { ProgressBarComponent } from './shared/components/progress-bar/progress-bar.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { HttpClientModule } from '@angular/common/http';
     ClosableTagComponent,
     ConfirmModalComponent,
     SortableHeaderDirective,
+    ProgressBarComponent,
   ],
   imports: [
     BrowserModule,

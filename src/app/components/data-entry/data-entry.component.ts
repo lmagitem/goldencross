@@ -423,7 +423,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   /** Removes the selected period. */
   removePeriod(anlzdPrd: AnalysedPeriod, stock: Stock) {
     stock.analyzedPeriods = stock.analyzedPeriods.filter(
-      (p) => p.period.name === anlzdPrd.period.name
+      (p) => p.period.name !== anlzdPrd.period.name
     );
     this.stateService.updateStock(stock);
   }

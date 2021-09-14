@@ -13,6 +13,7 @@ import { MathUtils } from 'src/app/shared/utils/math.utils';
 import { LoggingService } from '../logging/logging.service';
 import { MovingAverageService } from '../moving-average/moving-average.service';
 import { PriceService } from '../price/price.service';
+import { ProgressBarService } from '../progress-bar/progress-bar.service';
 import { StateService } from '../state/state.service';
 import { TiingoRequestService } from '../tiingo-request/tiingo-request.service';
 
@@ -23,6 +24,7 @@ import { TiingoRequestService } from '../tiingo-request/tiingo-request.service';
 export class DataProcessingService {
   constructor(
     private tiingoService: TiingoRequestService,
+    private progressBarService: ProgressBarService,
     private movingAverageService: MovingAverageService,
     private loggingService: LoggingService,
     private priceService: PriceService,
@@ -33,6 +35,16 @@ export class DataProcessingService {
    *  that period and calculate the moving averages required by the user's rulesets. */
   public processStock(stock: Stock, periods: Period[] = []): Promise<Stock> {
     return new Promise<Stock>((resolve, reject) => {
+      this.progressBarService.update(
+        `${
+          stock.name !== '' ? stock.name : stock.ticker
+        }: Requesting stock infos from Tiingo...`,
+        10,
+        'warning',
+        true,
+        true
+      );
+
       this.tiingoService
         .getInfos(stock)
         .pipe(first())
@@ -129,6 +141,15 @@ export class DataProcessingService {
         LogType.DATA_PROCESSING,
         `${stock.name} - ${period.name}: Starting to process the period.`
       );
+      this.progressBarService.update(
+        `${stock.name !== '' ? stock.name : stock.ticker} - ${
+          period.name
+        }: Calculating initial data about the period...`,
+        20,
+        'info',
+        true,
+        true
+      );
 
       // Retreive which moving averages we need to keep track of
       const movingAveragesToCalculate: number[] = [];
@@ -212,6 +233,16 @@ export class DataProcessingService {
             tickerInfos.endDate
           ).toJSON()}.`
         );
+        this.progressBarService.update(
+          `${stock.name !== '' ? stock.name : stock.ticker} - ${
+            period.name
+          }: Tiingo doesn't have enough data for this period.`,
+          100,
+          'danger',
+          true,
+          true,
+          true
+        );
 
         reject();
       }
@@ -228,6 +259,15 @@ export class DataProcessingService {
           period.endDate
         ).toJSON()} while requested end is ${new Date(endToRequest).toJSON()}.`
       );
+      this.progressBarService.update(
+        `${stock.name !== '' ? stock.name : stock.ticker} - ${
+          period.name
+        }: Retreiving price data from Tiingo...`,
+        30,
+        'warning',
+        true,
+        true
+      );
 
       // Retreive the prices
       this.tiingoService
@@ -243,6 +283,17 @@ export class DataProcessingService {
             LogType.DATA_PROCESSING,
             `${stock.name} - ${period.name}: I've received ${priceHistory.length} trading days worth of data.`
           );
+          this.progressBarService.update(
+            `${stock.name !== '' ? stock.name : stock.ticker} - ${
+              period.name
+            }: received ${
+              priceHistory.length
+            } trading days worth of data, calculating prices and growth...`,
+            50,
+            'info',
+            true,
+            true
+          );
 
           // Calculate period data (high, low...)
           let priceBefore = MathUtils.roundTwoDecimal(
@@ -252,6 +303,17 @@ export class DataProcessingService {
               priceHistory
             ) || 0
           );
+          this.progressBarService.update(
+            `${stock.name !== '' ? stock.name : stock.ticker} - ${
+              period.name
+            }: received ${
+              priceHistory.length
+            } trading days worth of data, calculating prices and growth...`,
+            55,
+            'info',
+            true,
+            true
+          );
 
           let lowest = MathUtils.roundTwoDecimal(
             this.priceService.getLowestClosingPrice(
@@ -259,6 +321,17 @@ export class DataProcessingService {
               period.endDate,
               priceHistory
             )
+          );
+          this.progressBarService.update(
+            `${stock.name !== '' ? stock.name : stock.ticker} - ${
+              period.name
+            }: received ${
+              priceHistory.length
+            } trading days worth of data, calculating prices and growth...`,
+            60,
+            'info',
+            true,
+            true
           );
 
           let periodGrowth = MathUtils.roundFourDecimal(
@@ -275,6 +348,17 @@ export class DataProcessingService {
               ) || 0
             )
           );
+          this.progressBarService.update(
+            `${stock.name !== '' ? stock.name : stock.ticker} - ${
+              period.name
+            }: received ${
+              priceHistory.length
+            } trading days worth of data, calculating prices and growth...`,
+            65,
+            'info',
+            true,
+            true
+          );
 
           let priceSixMonths = MathUtils.roundTwoDecimal(
             this.movingAverageService.getMAPrice(
@@ -282,6 +366,17 @@ export class DataProcessingService {
               5,
               priceHistory
             ) || 0
+          );
+          this.progressBarService.update(
+            `${stock.name !== '' ? stock.name : stock.ticker} - ${
+              period.name
+            }: received ${
+              priceHistory.length
+            } trading days worth of data, calculating prices and growth...`,
+            70,
+            'info',
+            true,
+            true
           );
 
           let priceTwoYears = MathUtils.roundTwoDecimal(
@@ -295,6 +390,17 @@ export class DataProcessingService {
           this.loggingService.log(
             LogType.DATA_PROCESSING,
             `${stock.name} - ${period.name}: priceBefore: ${priceBefore}, lowest: ${lowest}, periodGrowth: ${periodGrowth}, priceSixMonths: ${priceSixMonths}, priceTwoYears: ${priceTwoYears}.`
+          );
+          this.progressBarService.update(
+            `${stock.name !== '' ? stock.name : stock.ticker} - ${
+              period.name
+            }: received ${
+              priceHistory.length
+            } trading days worth of data, calculating moving averages...`,
+            75,
+            'info',
+            true,
+            true
           );
 
           // Calculate moving averages
@@ -321,6 +427,15 @@ export class DataProcessingService {
             LogType.DATA_PROCESSING,
             `${stock.name} - ${period.name}: Just finished calculating the moving averages.`
           );
+          this.progressBarService.update(
+            `${stock.name !== '' ? stock.name : stock.ticker} - ${
+              period.name
+            }: Searching for golden crosses...`,
+            90,
+            'info',
+            true,
+            true
+          );
 
           // Calculate crossings
           const crossings: PriceAtCrossing[] =
@@ -333,6 +448,16 @@ export class DataProcessingService {
           this.loggingService.log(
             LogType.DATA_PROCESSING,
             `${stock.name} - ${period.name}: Just finished calculating the crossings. I've found ${crossings.length} distinct ones.`
+          );
+          this.progressBarService.update(
+            `${stock.name !== '' ? stock.name : stock.ticker} - ${
+              period.name
+            }: Data processed with success!`,
+            100,
+            'success',
+            true,
+            true,
+            true
           );
 
           resolve({

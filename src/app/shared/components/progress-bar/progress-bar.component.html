@@ -1,0 +1,12 @@
+<div
+  [class.black]="type === 'primary' || type === 'success' || type === 'warning'"
+>
+  <ngb-progressbar
+    [type]="type"
+    [value]="value"
+    [striped]="striped"
+    [animated]="animated"
+    height="16px"
+    >{{ text }}</ngb-progressbar
+  >
+</div>
