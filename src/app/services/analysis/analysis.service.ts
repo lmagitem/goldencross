@@ -9,6 +9,8 @@ import { Stock } from 'src/app/shared/models/stock.model';
 import { MathUtils } from 'src/app/shared/utils/math.utils';
 import { StringUtils } from 'src/app/shared/utils/string.utils';
 import { PriceService } from '../price/price.service';
+import { Period } from 'src/app/shared/models/period.model';
+import * as _ from 'lodash';
 
 /** Provides functions to analyse and process price movements. */
 @Injectable({
@@ -18,12 +20,28 @@ export class AnalysisService {
   constructor(private priceService: PriceService) {}
 
   /** After being fed the necessary data, executes the buy strategy represented by the given ruleset.
-   *  @description Usable keywords for the formula are: "avg", "last-used", "last-of-type", "curr", "prev-high" */
+   *  @description Usable keywords for the formula are: "avg", "last-used", "last-of-type", "curr", "price-before" */
   public processDataWithRuleset(
     stock: Stock,
     anlzdPeriod: AnalysedPeriod,
     ruleset: Ruleset
   ): AnalysisResults {
+    let results: AnalysisResults | undefined;
+
+    // If we already calculated a value for this, reuse it
+    if (
+      anlzdPeriod.resultsPerRulesets !== undefined &&
+      anlzdPeriod.resultsPerRulesets instanceof Map
+    ) {
+      results = anlzdPeriod.resultsPerRulesets.get(
+        this.getRulesetHash(anlzdPeriod, ruleset)
+      );
+      if (results !== undefined) {
+        return results;
+      }
+    }
+
+    // Else begin the process
     const lastOfTypes: Map<CrossingType, number> = new Map();
     const priceBefore = anlzdPeriod.priceBefore;
     const priceTwoYears = anlzdPeriod.priceTwoYears;
@@ -127,7 +145,29 @@ export class AnalysisService {
             this.priceService.calculateGrowth(costAverage, priceTwoYears)
           );
 
-    return { costAverage, gainsAfterTwoYears, usedCapital, log };
+    // Save the results before returning them
+    results = { costAverage, gainsAfterTwoYears, usedCapital, log };
+    if (
+      anlzdPeriod.resultsPerRulesets === undefined ||
+      !(anlzdPeriod.resultsPerRulesets instanceof Map)
+    ) {
+      anlzdPeriod.resultsPerRulesets = new Map();
+    }
+    anlzdPeriod.resultsPerRulesets.set(
+      this.getRulesetHash(anlzdPeriod, ruleset),
+      results
+    );
+
+    return results;
+  }
+
+  /** Returns a hash to be used to recognize the results of an analysis for a specific state of an {@link AnalysedPeriod} and a {@link Ruleset}. */
+  public getRulesetHash(anlzdPeriod: AnalysedPeriod, ruleset: Ruleset): string {
+    return (
+      anlzdPeriod.crossings.length +
+      anlzdPeriod.crossings.map((c) => c.type).reduce((a, b) => a + b, '') +
+      JSON.stringify(ruleset)
+    );
   }
 
   /** Prepares the formula by replacing the keywords with actual numbers. */
@@ -150,7 +190,7 @@ export class AnalysisService {
     formula = StringUtils.replaceAll(formula, 'last-used', lastUsed);
     formula = StringUtils.replaceAll(formula, 'last-of-type', lastOfType);
     formula = StringUtils.replaceAll(formula, 'curr', crossing.price);
-    formula = StringUtils.replaceAll(formula, 'prev-high', priceBefore);
+    formula = StringUtils.replaceAll(formula, 'price-before', priceBefore);
     return formula;
   }
 }

@@ -12,4 +12,5 @@ export interface Stock {
   tags: string[];
   infos?: TickerInfos;
   analyzedPeriods: Array<AnalysedPeriod>;
+  hide?: boolean;
 }

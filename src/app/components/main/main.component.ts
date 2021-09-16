@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { StateService } from 'src/app/services/state/state.service';
 import {
   initialLoggingStatus,
@@ -6,8 +6,7 @@ import {
 } from 'src/app/services/logging/logging.service';
 import { LogType } from '../../shared/enums/log-type.enum';
 import { DataProcessingService } from 'src/app/services/data-processing/data-processing.service';
-import { first } from 'rxjs/operators';
-import { Stock } from 'src/app/shared/models/stock.model';
+import { SubSink } from 'subsink';
 
 /** The main page of the app where one can find all the features neatly stored into a beautiful accordion. */
 @Component({
@@ -15,7 +14,9 @@ import { Stock } from 'src/app/shared/models/stock.model';
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.scss'],
 })
-export class MainComponent {
+export class MainComponent implements OnInit {
+  /** Subscription management. */
+  private subs: SubSink = new SubSink();
   /** Is logging enabled for Json Parsing? */
   jsonLog =
     initialLoggingStatus.find((o) => o.type === LogType.JSON_PARSING)
@@ -30,6 +31,10 @@ export class MainComponent {
       ?.enabled || false;
   /** Can the user see the advanced buttons? */
   advancedButtonsEnabled = false;
+  /** Should we hide the Moving Averages columns? */
+  hideMAColumns = true;
+  /** Should we show the period rows? */
+  showPeriods = true;
 
   constructor(
     private stateService: StateService,
@@ -37,14 +42,36 @@ export class MainComponent {
     private dataProcessingService: DataProcessingService
   ) {}
 
-  /** Sets the visibility of all columns to true. */
-  public showColumns() {
-    this.stateService.showColumns();
+  ngOnInit(): void {
+    this.subs.sink = this.stateService.hideMACrossings$.subscribe((value) => {
+      this.hideMAColumns = value;
+    });
+    this.subs.sink = this.stateService.showPeriodRows$.subscribe((value) => {
+      this.showPeriods = value;
+    });
   }
 
   /** Sets the visibility of all columns to true. */
+  public showColumns() {
+    this.stateService.showManuallyHiddenColumns();
+  }
+
+  /** Sets the visibility of all stocks to true. */
+  public showStocks() {
+    this.stateService.showHiddenStocks();
+  }
+
+  /** Switch the visibility of all columns. */
   public showAllColumns() {
-    this.stateService.showAllColumns();
+    if (this.hideMAColumns && !this.showPeriods) {
+      this.showAllPeriods();
+    }
+    this.stateService.showCrossingColumns();
+  }
+
+  /** Switch the visibility of period rows. */
+  public showAllPeriods() {
+    this.stateService.showPeriodRows();
   }
 
   /** Erases the app's data from the user local storage. */

@@ -27,7 +27,6 @@ import { AnalysisService } from 'src/app/services/analysis/analysis.service';
 import { StateService } from 'src/app/services/state/state.service';
 import { LoggingService } from 'src/app/services/logging/logging.service';
 import { PriceDisplayService } from 'src/app/services/price-display/price-display.service';
-import { StringUtils } from 'src/app/shared/utils/string.utils';
 import { Sector, sectors } from 'src/app/shared/enums/sector.enum';
 import { industries, Industry } from 'src/app/shared/enums/industry.enum';
 import { periodsToAnalyze } from 'src/app/shared/others/periods-to-analyze';
@@ -38,6 +37,7 @@ import { ConfirmModalComponent } from 'src/app/shared/components/confirm-modal/c
 import { ModalUtils } from 'src/app/shared/utils/modal.utils';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { MathUtils } from 'src/app/shared/utils/math.utils';
+import { EnumUtils } from 'src/app/shared/utils/enum.utils';
 
 /** Empty stock used to add new ones. */
 const EMPTY_STOCK = {
@@ -70,6 +70,8 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   sortedStocks: Array<Stock> = [];
   /** Should we hide the Moving Averages columns? */
   hideMAColumns = true;
+  /** Should we show the period rows? */
+  showPeriods = true;
   /** The selected period for each stock */
   selectedPeriods: Map<Stock, Period | 'all' | undefined> = new Map();
   /** New stock to add to the list. */
@@ -112,8 +114,14 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     this.subs.sink = this.stateService.showColumnsAction$.subscribe(() => {
       this.showColumns();
     });
-    this.subs.sink = this.stateService.showAllColumnsAction$.subscribe(() => {
-      this.showAllColumns();
+    this.subs.sink = this.stateService.showStocksAction$.subscribe(() => {
+      this.showStocks();
+    });
+    this.subs.sink = this.stateService.hideMACrossings$.subscribe((value) => {
+      this.hideMAColumns = value;
+    });
+    this.subs.sink = this.stateService.showPeriodRows$.subscribe((value) => {
+      this.showPeriods = value;
     });
   }
 
@@ -477,10 +485,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
 
   /** Returns a somewhat readable string from an enum value. */
   public enumToString(o: any): string {
-    const s = (
-      StringUtils.replaceAll(o + '', '_', ' ') as string
-    ).toLowerCase();
-    return s.charAt(0).toUpperCase() + s.substring(1);
+    return EnumUtils.enumToString(o);
   }
 
   /** Sets the visibility of all columns to true. */
@@ -488,8 +493,8 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     this.dataEntryColumns.forEach((c) => (c.visible = true));
   }
 
-  /** Switch the visibility of moving average columns. */
-  public showAllColumns() {
-    this.hideMAColumns = !this.hideMAColumns;
+  /** Sets the visibility of all stocks to true. */
+  public showStocks() {
+    this.stocks.forEach((s) => (s.hide = false));
   }
 }

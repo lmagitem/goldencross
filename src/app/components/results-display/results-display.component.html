@@ -1,1 +1,275 @@
-<p>:)</p>
+<ul class="nav-tabs nav">
+  <li class="nav-item">
+    <a
+      class="nav-link"
+      [class.active]="currentTab === 'overall'"
+      (click)="currentTab = 'overall'"
+      >Overall
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link"
+      [class.active]="currentTab === 'sector'"
+      (click)="currentTab = 'sector'"
+      >Sector
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link"
+      [class.active]="currentTab === 'tags'"
+      (click)="currentTab = 'tags'"
+      >Tags
+    </a>
+  </li>
+</ul>
+<div class="px-3 py-3 overflow-auto">
+  <h3 *ngIf="currentTab === 'overall'">Overall results of our rulesets.</h3>
+  <h3 *ngIf="currentTab === 'sector'">Results by sector/industry/period.</h3>
+  <p *ngIf="currentTab === 'sector'">
+    Click on the following buttons to show/hide:
+    <a
+      class="btn m-1"
+      [class.btn-info]="showIndustries"
+      [class.btn-secondary]="!showIndustries"
+      (click)="showIndustries = !showIndustries"
+      >Industries</a
+    >
+    <a
+      class="btn m-1"
+      [class.btn-info]="showPeriods"
+      [class.btn-secondary]="!showPeriods"
+      (click)="showPeriods = !showPeriods"
+      >Periods</a
+    >
+  </p>
+  <h3 *ngIf="currentTab === 'tags'">Results by tags.</h3>
+  <p *ngIf="currentTab === 'tags'">
+    Click on the following buttons to show/hide:
+    <a
+      class="btn m-1"
+      [class.btn-info]="showPeriods"
+      [class.btn-secondary]="!showPeriods"
+      (click)="showPeriods = !showPeriods"
+      >Periods</a
+    >
+  </p>
+  <table class="table table-striped">
+    <ng-container *ngIf="currentTab === 'overall'">
+      <thead class="bigger">
+        <tr>
+          <th></th>
+          <th
+            scope="col"
+            placement="bottom"
+            ngbTooltip="The result of the period analysis using the ruleset {{
+              ruleset.name
+            }} - are displayed the growth factor between the cost average of the simulated entry and the '+2Y Price', the cost average of the simulated entry, and the percentage of allocated capital used"
+            container="body"
+            *ngFor="let ruleset of rulesets"
+          >
+            {{ ruleset.name }}
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bigger">
+        <tr>
+          <th scope="row">Growth after 2 years</th>
+          <td
+            *ngFor="let ruleset of rulesets"
+            [innerHTML]="getSimpleGrowthAfterTwoYears(ruleset)"
+          ></td>
+        </tr>
+        <tr>
+          <th scope="row">Percentage of allocated capital spent</th>
+          <td
+            *ngFor="let ruleset of rulesets"
+            [innerHTML]="getSimplePercentageSpent(ruleset)"
+          ></td>
+        </tr></tbody
+    ></ng-container>
+    <ng-container *ngIf="currentTab === 'sector'">
+      <thead>
+        <tr>
+          <th
+            scope="col"
+            placement="top"
+            ngbTooltip="Click here to sort by name"
+            container="body"
+          >
+            Sector
+          </th>
+          <th
+            scope="col"
+            placement="top"
+            ngbTooltip="Click here to sort by name"
+            container="body"
+          >
+            Industry
+          </th>
+          <th
+            scope="col"
+            placement="bottom"
+            ngbTooltip="The price at which the stock traded just before the beggining of this period (smoothed using a 5 days moving average)"
+            container="body"
+          >
+            Period
+          </th>
+          <th
+            scope="col"
+            placement="bottom"
+            ngbTooltip="The result of the period analysis using the ruleset {{
+              ruleset.name
+            }} - are displayed the growth factor between the cost average of the simulated entry and the '+2Y Price', the cost average of the simulated entry, and the percentage of allocated capital used"
+            container="body"
+            *ngFor="let ruleset of rulesets"
+          >
+            {{ ruleset.name }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let sector of sectors">
+          <tr>
+            <td>{{ enumToString(sector) }}</td>
+            <td class="faded">All industries</td>
+            <td class="faded">All periods</td>
+            <td
+              *ngFor="let ruleset of rulesets"
+              [innerHTML]="
+                getSectorResults(ruleset, sector, undefined, undefined)
+              "
+            ></td>
+          </tr>
+          <ng-container *ngFor="let period of periods">
+            <tr *ngIf="showPeriods">
+              <td class="faded">{{ enumToString(sector) }}</td>
+              <td class="faded">All industries</td>
+              <td
+                placement="top"
+                ngbTooltip="{{ period.name }} starts on {{
+                  formatDate(period.startDate)
+                }} and ends on {{
+                  formatDate(period.endDate)
+                }}, with an average yearly inflation of {{
+                  period.yearlyInflation
+                }} during that time"
+                container="body"
+              >
+                {{ period.name }}
+              </td>
+              <td
+                *ngFor="let ruleset of rulesets"
+                [innerHTML]="
+                  getSectorResults(ruleset, sector, undefined, period)
+                "
+              ></td>
+            </tr>
+          </ng-container>
+          <ng-container *ngFor="let industry of industries.get(sector)">
+            <tr *ngIf="showIndustries">
+              <td class="faded">{{ enumToString(sector) }}</td>
+              <td>{{ enumToString(industry) }}</td>
+              <td class="faded">All periods</td>
+              <td
+                *ngFor="let ruleset of rulesets"
+                [innerHTML]="
+                  getSectorResults(ruleset, sector, industry, undefined)
+                "
+              ></td>
+            </tr>
+            <ng-container *ngFor="let period of periods">
+              <tr *ngIf="showIndustries && showPeriods">
+                <td class="faded">{{ enumToString(sector) }}</td>
+                <td class="faded">{{ enumToString(industry) }}</td>
+                <td
+                  placement="top"
+                  ngbTooltip="{{ period.name }} starts on {{
+                    formatDate(period.startDate)
+                  }} and ends on {{
+                    formatDate(period.endDate)
+                  }}, with an average yearly inflation of {{
+                    period.yearlyInflation
+                  }} during that time"
+                  container="body"
+                >
+                  {{ period.name }}
+                </td>
+                <td
+                  *ngFor="let ruleset of rulesets"
+                  [innerHTML]="
+                    getSectorResults(ruleset, sector, industry, period)
+                  "
+                ></td>
+              </tr> </ng-container></ng-container
+        ></ng-container></tbody
+    ></ng-container>
+    <ng-container *ngIf="currentTab === 'tags'">
+      <thead>
+        <tr>
+          <th
+            scope="col"
+            placement="top"
+            ngbTooltip="Click here to sort by name"
+            container="body"
+          >
+            Tag
+          </th>
+          <th
+            scope="col"
+            placement="bottom"
+            ngbTooltip="The price the stock reached 2 calendar years after the last day of the period (smoothed using a 5 days moving average), followed by the percentage of loss from the 'Price before'"
+            container="body"
+          >
+            Period
+          </th>
+          <th
+            scope="col"
+            placement="bottom"
+            ngbTooltip="The result of the period analysis using the ruleset {{
+              ruleset.name
+            }} - are displayed the growth factor between the cost average of the simulated entry and the '+2Y Price', the cost average of the simulated entry, and the percentage of allocated capital used"
+            container="body"
+            *ngFor="let ruleset of rulesets"
+          >
+            {{ ruleset.name }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let tag of tags">
+          <tr>
+            <td>{{ tag }}</td>
+            <td class="faded">All periods</td>
+            <td
+              *ngFor="let ruleset of rulesets"
+              [innerHTML]="getTagResults(ruleset, tag, undefined)"
+            ></td>
+          </tr>
+          <ng-container *ngFor="let period of periods">
+            <tr *ngIf="showPeriods">
+              <td class="faded">{{ tag }}</td>
+              <td
+                placement="top"
+                ngbTooltip="{{ period.name }} starts on {{
+                  formatDate(period.startDate)
+                }} and ends on {{
+                  formatDate(period.endDate)
+                }}, with an average yearly inflation of {{
+                  period.yearlyInflation
+                }} during that time"
+                container="body"
+              >
+                {{ period.name }}
+              </td>
+              <td
+                *ngFor="let ruleset of rulesets"
+                [innerHTML]="getTagResults(ruleset, tag, period)"
+              ></td>
+            </tr>
+          </ng-container>
+        </ng-container></tbody
+    ></ng-container>
+  </table>
+</div>

@@ -1,3 +1,4 @@
+import { AnalysisResults } from './analysis-results.model';
 import { EndOfDayPrice } from './end-of-day-price.model';
 import { PriceAtCrossing } from './golden-cross.model';
 import { Period } from './period.model';
@@ -13,4 +14,5 @@ export interface AnalysedPeriod {
   periodGrowth: number;
   priceSixMonths: number;
   priceTwoYears: number;
+  resultsPerRulesets?: Map<string, AnalysisResults>;
 }

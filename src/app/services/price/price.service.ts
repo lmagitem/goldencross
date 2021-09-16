@@ -73,7 +73,7 @@ export class PriceService {
     data = this.returnPricesBetweenDates(start, end, data);
     return data.length > 0
       ? MathUtils.roundTwoDecimal(
-          data.reduce((a, b) => (a.low <= b.low ? a : b)).low
+          data.reduce((a, b) => (a.adjLow <= b.adjLow ? a : b)).adjLow
         )
       : -1;
   }

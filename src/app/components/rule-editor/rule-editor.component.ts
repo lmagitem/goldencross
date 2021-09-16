@@ -20,6 +20,7 @@ import { MathUtils } from 'src/app/shared/utils/math.utils';
 import { ModalUtils } from 'src/app/shared/utils/modal.utils';
 import { SubSink } from 'subsink';
 import { ReactiveFormUtils } from 'src/app/shared/utils/reactive-form.utils';
+import { StringUtils } from 'src/app/shared/utils/string.utils';
 
 /** A form that enables to create and edit rulesets. */
 @Component({
@@ -93,7 +94,10 @@ export class RuleEditorComponent implements OnInit, OnDestroy {
 
   /** Returns the given rule's formula. */
   public getFormula(rule: AbstractControl): string {
-    return rule.get('formula')?.value;
+    const formula = rule.get('formula')?.value;
+    return formula !== undefined
+      ? StringUtils.replaceAll(formula, '? curr : -1', '')
+      : '';
   }
 
   /** Returns the list of all the turns that can be selected in the allowed turns selector. That is those that aren't already selected. */
@@ -181,7 +185,7 @@ export class RuleEditorComponent implements OnInit, OnDestroy {
   /** Updates the value of the formula using what the user typed into the corresponding input. */
   public updateFormula(rule: AbstractControl, event: any) {
     (rule as FormGroup).controls['formula'].patchValue(
-      (event.target as HTMLInputElement).value
+      (event.target as HTMLInputElement).value + '? curr : -1'
     );
   }
 

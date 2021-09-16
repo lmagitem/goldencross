@@ -127,161 +127,198 @@
     </thead>
     <tbody>
       <ng-container *ngFor="let stock of sortedStocks">
-        <tr>
-          <th scope="row">
-            <a class="btn btn-danger" (click)="removeStock(stock)">🗑</a
-            ><a class="btn btn-dark" (click)="addPeriod(stock)">+</a>
-          </th>
-          <td>
-            {{ stock.name }}
-          </td>
-          <td>
-            {{ stock.ticker }}
-          </td>
-          <td>
-            {{ enumToString(stock.sector) }}
-          </td>
-          <td>
-            {{ enumToString(stock.industry) }}
-          </td>
-          <td>
-            <span *ngFor="let tag of stock.tags; let tagN = index">{{
-              tagN > 0 ? ", " + tag : tag
-            }}</span>
-          </td>
-          <td>
-            <select
-              class="form-control"
-              (change)="selectCurrentPeriod(stock, $event)"
-            >
-              <option value="" disabled>Choose a period</option>
-              <option
-                *ngFor="let period of getPeriods(stock)"
-                [value]="period.name"
+        <ng-container *ngIf="!stock.hide">
+          <tr>
+            <th scope="row">
+              <a
+                class="btn btn-warning m-1"
+                placement="top"
+                ngbTooltip="Click here to hide that stock's rows"
+                container="body"
+                (click)="
+                  stock.hide === undefined
+                    ? (stock.hide = true)
+                    : (stock.hide = !stock.hide)
+                "
+                >👁</a
               >
-                {{ period.name }}
-              </option>
-              <option value="all" [disabled]="getPeriods(stock).length < 2">
-                Add all
-              </option>
-            </select>
-          </td>
-          <td></td>
-          <ng-container *ngIf="!hideMAColumns">
+              <a
+                class="btn btn-danger m-1"
+                placement="top"
+                ngbTooltip="Click here to delete that stock"
+                container="body"
+                (click)="removeStock(stock)"
+                >🗑</a
+              ><a
+                class="btn btn-primary m-1"
+                placement="top"
+                ngbTooltip="Click here to add the selected period"
+                container="body"
+                (click)="addPeriod(stock)"
+                >+</a
+              >
+            </th>
+            <td>
+              {{ stock.name }}
+            </td>
+            <td>
+              {{ stock.ticker }}
+            </td>
+            <td>
+              {{ enumToString(stock.sector) }}
+            </td>
+            <td>
+              {{ enumToString(stock.industry) }}
+            </td>
+            <td>
+              <span *ngFor="let tag of stock.tags; let tagN = index">{{
+                tagN > 0 ? ", " + tag : tag
+              }}</span>
+            </td>
+            <td>
+              <select
+                class="form-control"
+                (change)="selectCurrentPeriod(stock, $event)"
+              >
+                <option value="" disabled>Choose a period</option>
+                <option
+                  *ngFor="let period of getPeriods(stock)"
+                  [value]="period.name"
+                >
+                  {{ period.name }}
+                </option>
+                <option value="all" [disabled]="getPeriods(stock).length < 2">
+                  Add all
+                </option>
+              </select>
+            </td>
+            <td></td>
+            <ng-container *ngIf="!hideMAColumns">
+              <td
+                *ngFor="let column of dataEntryColumns"
+                [class.d-none]="!column.visible"
+              ></td
+            ></ng-container>
+            <td></td>
+            <td></td>
+            <td></td>
             <td
-              *ngFor="let column of dataEntryColumns"
-              [class.d-none]="!column.visible"
-            ></td
-          ></ng-container>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td
-            class="global-results"
-            [innerHTML]="getGrowthWithClass(stock)"
-          ></td>
-          <td
-            *ngFor="let column of rulesetColumns"
-            class="global-results"
-            [innerHTML]="getAnalysisResults(stock, 'all', column.ruleset)"
-          ></td>
-        </tr>
-        <tr
-          *ngFor="
-            let anlzdPeriod of stock.analyzedPeriods;
-            let periodIndex = index
-          "
-        >
-          <th scope="row">
-            <a
-              class="btn btn-secondary"
-              (click)="updatePeriod(anlzdPeriod, stock)"
-              >📡</a
-            >
-            <a class="btn btn-dark" (click)="removePeriod(anlzdPeriod, stock)"
-              >-</a
-            >
-          </th>
-          <td class="faded">
-            {{ stock.name }}
-          </td>
-          <td class="faded">
-            {{ stock.ticker }}
-          </td>
-          <td class="faded">
-            {{ enumToString(stock.sector) }}
-          </td>
-          <td class="faded">
-            {{ enumToString(stock.industry) }}
-          </td>
-          <td class="faded">
-            <span *ngFor="let tag of stock.tags; let tagN = index">{{
-              tagN > 0 ? ", " + tag : tag
-            }}</span>
-          </td>
-          <td
-            [class.not-filled]="
-              anlzdPeriod.priceBefore === undefined ||
-              anlzdPeriod.priceBefore === null ||
-              anlzdPeriod.priceBefore <= 0
-            "
-            placement="top"
-            ngbTooltip="{{ anlzdPeriod.period.name }} starts on {{
-              formatDate(anlzdPeriod.period.startDate)
-            }} and ends on {{
-              formatDate(anlzdPeriod.period.endDate)
-            }}, with an average yearly inflation of {{
-              anlzdPeriod.period.yearlyInflation
-            }} during that time"
-            container="body"
-          >
-            {{ anlzdPeriod.period.name }}
-          </td>
-          <td class="bigger">
-            {{ formatToTwoDigits(anlzdPeriod.priceBefore) }}
-          </td>
-          <ng-container *ngIf="!hideMAColumns">
+              class="global-results"
+              [innerHTML]="getGrowthWithClass(stock)"
+            ></td>
             <td
-              *ngFor="let column of dataEntryColumns"
-              [class.d-none]="!column.visible"
-              [innerHTML]="getCrossing(column.index, column.type, anlzdPeriod)"
-            ></td
-          ></ng-container>
-          <td
-            [innerHTML]="
-              getPriceAndGrowthWithClass(
-                anlzdPeriod.priceBefore,
-                anlzdPeriod.lowest
-              )
-            "
-          ></td>
-          <td
-            [innerHTML]="
-              getPriceAndGrowthWithClass(
-                anlzdPeriod.priceBefore,
-                anlzdPeriod.priceSixMonths
-              )
-            "
-          ></td>
-          <td
-            [innerHTML]="
-              getPriceAndGrowthWithClass(
-                anlzdPeriod.priceBefore,
-                anlzdPeriod.priceTwoYears
-              )
-            "
-          ></td>
-          <td [innerHTML]="getGrowthWithClass(anlzdPeriod.periodGrowth)"></td>
-          <td
-            *ngFor="let column of rulesetColumns"
-            class="results"
-            [innerHTML]="getAnalysisResults(stock, anlzdPeriod, column.ruleset)"
-          ></td>
-        </tr>
+              *ngFor="let column of rulesetColumns"
+              class="global-results"
+              [innerHTML]="getAnalysisResults(stock, 'all', column.ruleset)"
+            ></td>
+          </tr>
+          <ng-container *ngIf="showPeriods">
+            <tr
+              *ngFor="
+                let anlzdPeriod of stock.analyzedPeriods;
+                let periodIndex = index
+              "
+            >
+              <th scope="row">
+                <a
+                  class="btn btn-secondary m-1"
+                  (click)="updatePeriod(anlzdPeriod, stock)"
+                  >📡</a
+                >
+                <a
+                  class="btn btn-danger m-1"
+                  (click)="removePeriod(anlzdPeriod, stock)"
+                  >-</a
+                >
+              </th>
+              <td class="faded">
+                {{ stock.name }}
+              </td>
+              <td class="faded">
+                {{ stock.ticker }}
+              </td>
+              <td class="faded">
+                {{ enumToString(stock.sector) }}
+              </td>
+              <td class="faded">
+                {{ enumToString(stock.industry) }}
+              </td>
+              <td class="faded">
+                <span *ngFor="let tag of stock.tags; let tagN = index">{{
+                  tagN > 0 ? ", " + tag : tag
+                }}</span>
+              </td>
+              <td
+                [class.not-filled]="
+                  anlzdPeriod.priceBefore === undefined ||
+                  anlzdPeriod.priceBefore === null ||
+                  anlzdPeriod.priceBefore <= 0
+                "
+                placement="top"
+                ngbTooltip="{{ anlzdPeriod.period.name }} starts on {{
+                  formatDate(anlzdPeriod.period.startDate)
+                }} and ends on {{
+                  formatDate(anlzdPeriod.period.endDate)
+                }}, with an average yearly inflation of {{
+                  anlzdPeriod.period.yearlyInflation
+                }} during that time"
+                container="body"
+              >
+                {{ anlzdPeriod.period.name }}
+              </td>
+              <td class="bigger">
+                {{ formatToTwoDigits(anlzdPeriod.priceBefore) }}
+              </td>
+              <ng-container *ngIf="!hideMAColumns">
+                <td
+                  *ngFor="let column of dataEntryColumns"
+                  [class.d-none]="!column.visible"
+                  [innerHTML]="
+                    getCrossing(column.index, column.type, anlzdPeriod)
+                  "
+                ></td
+              ></ng-container>
+              <td
+                [innerHTML]="
+                  getPriceAndGrowthWithClass(
+                    anlzdPeriod.priceBefore,
+                    anlzdPeriod.lowest
+                  )
+                "
+              ></td>
+              <td
+                [innerHTML]="
+                  getPriceAndGrowthWithClass(
+                    anlzdPeriod.priceBefore,
+                    anlzdPeriod.priceSixMonths
+                  )
+                "
+              ></td>
+              <td
+                [innerHTML]="
+                  getPriceAndGrowthWithClass(
+                    anlzdPeriod.priceBefore,
+                    anlzdPeriod.priceTwoYears
+                  )
+                "
+              ></td>
+              <td
+                [innerHTML]="getGrowthWithClass(anlzdPeriod.periodGrowth)"
+              ></td>
+              <td
+                *ngFor="let column of rulesetColumns"
+                class="results"
+                [innerHTML]="
+                  getAnalysisResults(stock, anlzdPeriod, column.ruleset)
+                "
+              ></td>
+            </tr>
+          </ng-container>
+        </ng-container>
       </ng-container>
       <tr>
         <th scope="row">
-          <a class="btn btn-primary" (click)="addStock()">+</a>
+          <a class="btn btn-primary m-1" (click)="addStock()">+</a>
         </th>
         <td>
           <span class="form-group" style="display: inline-block">
@@ -326,27 +363,29 @@
             </option>
           </select>
         </td>
-        <td>
-          <input
-            id="currenttag"
-            type="text"
-            placeholder="Tag"
-            class="col-10 form-control"
-            [value]="currentTag"
-            (keyup)="updateCurrentTag($event)"
-          />
-          <div class="col-2 pl-1">
-            <a class="btn btn-info" (click)="addTag()">+</a>
-          </div>
+        <td colspan="3">
+          <div class="row">
+            <div class="col-11">
+              <input
+                id="currenttag"
+                type="text"
+                placeholder="Tag, Other tag, And another one"
+                class="form-control"
+                [value]="currentTag"
+                (keyup)="updateCurrentTag($event)"
+              />
+            </div>
+            <div class="col-1 pl-1">
+              <a class="btn btn-primary ml-1" (click)="addTag()">+</a>
+            </div>
 
-          <shared-closable-tag
-            class="col-12 py-3"
-            [tags]="toTags()"
-            (change)="updateTags($event)"
-          ></shared-closable-tag>
+            <shared-closable-tag
+              class="col-12 py-3"
+              [tags]="toTags()"
+              (change)="updateTags($event)"
+            ></shared-closable-tag>
+          </div>
         </td>
-        <td></td>
-        <td></td>
         <ng-container *ngIf="!hideMAColumns">
           <td
             *ngFor="let column of dataEntryColumns"

@@ -12,30 +12,55 @@
             <div class="m-2">
               <a
                 placement="bottom"
+                ngbTooltip="Displays stocks that had been hidden"
+                container="body"
+                class="d-inline btn btn-warning m-2"
+                role="button"
+                (click)="showStocks()"
+                >Show manually hidden stocks</a
+              >
+              <a
+                *ngIf="!hideMAColumns"
+                placement="bottom"
                 ngbTooltip="Displays columns that had been hidden"
                 container="body"
-                class="d-inline btn btn-info m-2"
+                class="d-inline btn btn-primary m-2"
                 role="button"
                 (click)="showColumns()"
-                >👁</a
+                >Show manually hidden crossings</a
               >
               <a
                 placement="bottom"
                 ngbTooltip="Hide or show the moving average columns"
                 container="body"
-                class="d-inline btn btn-info m-2"
+                class="d-inline btn m-2"
                 role="button"
                 (click)="showAllColumns()"
-                >👁👁</a
+                [class.btn-info]="!hideMAColumns"
+                [class.btn-secondary]="hideMAColumns"
+                >{{ hideMAColumns ? "Show crossings" : "Hide crossings" }}</a
+              >
+              <a
+                placement="bottom"
+                ngbTooltip="Hide or show the period rows"
+                container="body"
+                class="d-inline btn m-2"
+                role="button"
+                (click)="showAllPeriods()"
+                [class.btn-info]="showPeriods"
+                [class.btn-secondary]="!showPeriods"
+                >{{ showPeriods ? "Hide periods" : "Show periods" }}</a
               >
               <a
                 *ngIf="advancedButtonsEnabled"
                 placement="top"
                 ngbTooltip="Shows data processing logs in your browser console"
                 container="body"
-                class="d-inline btn btn-info m-2 json-width"
+                class="d-inline btn m-2 json-width"
                 role="button"
                 (click)="switchLogging('proc')"
+                [class.btn-info]="processingLog"
+                [class.btn-secondary]="!processingLog"
                 >Data process logs {{ processingLog ? "on" : "off" }}
               </a>
               <a
@@ -43,9 +68,11 @@
                 placement="bottom"
                 ngbTooltip="Shows analysis logs in your browser console"
                 container="body"
-                class="d-inline btn btn-info m-2 analysis-width"
+                class="d-inline btn m-2 analysis-width"
                 role="button"
                 (click)="switchLogging('anal')"
+                [class.btn-info]="analysisLog"
+                [class.btn-secondary]="!analysisLog"
                 >Analysis logs {{ analysisLog ? "on" : "off" }}
               </a>
             </div>
@@ -103,7 +130,7 @@
                 placement="top"
                 ngbTooltip="Erases data that had been saved in your browser's local storage"
                 container="body"
-                class="d-inline btn btn-info m-2 analysis-width"
+                class="d-inline btn btn-primary m-2 analysis-width"
                 role="button"
                 (click)="clearLocalStorage()"
                 >Clear local storage
@@ -113,9 +140,11 @@
                 placement="top"
                 ngbTooltip="Shows json parsing logs in your browser console"
                 container="body"
-                class="d-inline btn btn-info m-2 json-width"
+                class="d-inline btn m-2 json-width"
                 role="button"
                 (click)="switchLogging('json')"
+                [class.btn-info]="jsonLog"
+                [class.btn-secondary]="!jsonLog"
                 >Json logs {{ jsonLog ? "on" : "off" }}
               </a>
               <a
@@ -123,8 +152,8 @@
                 ngbTooltip="Activates dev mode"
                 container="body"
                 class="d-inline btn m-2 json-width"
-                [class.btn-info]="!advancedButtonsEnabled"
-                [class.btn-light]="advancedButtonsEnabled"
+                [class.btn-info]="advancedButtonsEnabled"
+                [class.btn-secondary]="!advancedButtonsEnabled"
                 role="button"
                 (click)="advancedButtonsEnabled = !advancedButtonsEnabled"
                 >⚙️

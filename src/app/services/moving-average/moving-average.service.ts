@@ -44,7 +44,9 @@ export class MovingAverageService {
     }
 
     // Add every EoD price from the array and divide
-    return data.map((p) => p.close).reduce((a, b) => a + b, 0) / movingAverage;
+    return (
+      data.map((p) => p.adjClose).reduce((a, b) => a + b, 0) / movingAverage
+    );
   }
 
   /** Returns all MA crossings of queried types found in the given data. */
@@ -94,6 +96,8 @@ export class MovingAverageService {
           `The first entry will be at date ${new Date(eodp.date).toJSON()}.`
         );
       } else if (
+        previousEoD !== undefined &&
+        previousHashMap !== undefined &&
         eodp.movingAveragePrices !== undefined &&
         eodp.movingAveragePrices.length > 0 &&
         (new Date(eodp.date).getFullYear() >
@@ -123,7 +127,7 @@ export class MovingAverageService {
           ) {
             // Then we can create a GoldenCross
             crossings.push(
-              new PriceAtCrossing(eodp.date, eodp.close, c, Timescale.OD)
+              new PriceAtCrossing(eodp.date, eodp.adjClose, c, Timescale.OD)
             );
           }
         });

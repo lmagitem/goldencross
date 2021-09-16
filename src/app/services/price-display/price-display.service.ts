@@ -121,6 +121,19 @@ export class PriceDisplayService {
     );
   }
 
+  /** Returns a string usable in html to display a growth result and a percentage of capital used. */
+  public getGrowthAndPercentageWithClass(
+    growth: number,
+    percentage: number
+  ): string {
+    return (
+      this.getGrowthPercentageWithClass(growth) +
+      '<br>' +
+      Math.round(percentage * 100) +
+      '% capital spent'
+    );
+  }
+
   /** Returns a string usable in html to display a number followed by its growth percentage with proper formatting. */
   public getPriceAndGrowthPercentageWithClass(
     previous: number,

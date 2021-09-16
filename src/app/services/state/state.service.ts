@@ -27,10 +27,14 @@ export class StateService {
   private stocks = new BehaviorSubject<Stock[]>([]);
   /** The rulesets with which the results are calculated. */
   private rulesets = new BehaviorSubject<Ruleset[]>([]);
+  /** Switchs each time the user clicks on the button "Show periods". */
+  private showPeriods = new BehaviorSubject<boolean>(false);
+  /** Switchs each time the user clicks on the button "Show all columns". */
+  private hideMACrossings = new BehaviorSubject<boolean>(true);
   /** Emits true each time the user clicks on the button "Show columns". */
   private showColumnsAction = new Subject<boolean>();
-  /** Emits true each time the user clicks on the button "Show all columns". */
-  private showAllColumnsAction = new Subject<boolean>();
+  /** Emits true each time the user clicks on the button "Show hidden stocks". */
+  private showStocksAction = new Subject<boolean>();
   /** The token to use in order to retreive data from Tiingo. */
   public apiToken$ = this.apiToken.asObservable();
   /** The crossing types to manage for this session. */
@@ -39,10 +43,14 @@ export class StateService {
   public stocks$ = this.stocks.asObservable();
   /** The rulesets with which the results are calculated. */
   public rulesets$ = this.rulesets.asObservable();
+  /** Switchs each time the user clicks on the button "Show all columns". */
+  public showPeriodRows$ = this.showPeriods.asObservable();
+  /** Emits true each time the user clicks on the button "Show all columns". */
+  public hideMACrossings$ = this.hideMACrossings.asObservable();
   /** Emits true each time the user clicks on the button "Show columns". */
   public showColumnsAction$ = this.showColumnsAction.asObservable();
-  /** Emits true each time the user clicks on the button "Show all columns". */
-  public showAllColumnsAction$ = this.showAllColumnsAction.asObservable();
+  /** Emits true each time the user clicks on the button "Show hidden stocks". */
+  public showStocksAction$ = this.showStocksAction.asObservable();
 
   constructor(
     private storageService: StorageService,
@@ -63,6 +71,9 @@ export class StateService {
         })
       ) {
         const data: Export = JSON.parse(json);
+        data.stocks?.forEach((s) =>
+          s.analyzedPeriods?.forEach((p) => p.resultsPerRulesets === undefined)
+        );
 
         this.loggingService.log(
           LogType.JSON_PARSING,
@@ -126,10 +137,11 @@ export class StateService {
       this.crossingTypeList.getValue(),
       'goldencross_crossingTypeList'
     );
-    this.storageService.setSavedState(
-      this.stocks.getValue(),
-      'goldencross_stocks'
+    const stocks = this.stocks.getValue();
+    stocks.forEach((s) =>
+      s.analyzedPeriods?.forEach((p) => p.resultsPerRulesets === undefined)
     );
+    this.storageService.setSavedState(stocks, 'goldencross_stocks');
     this.storageService.setSavedState(
       this.rulesets.getValue(),
       'goldencross_rulesets'
@@ -141,11 +153,11 @@ export class StateService {
     const newApiToken = this.storageService.getSavedState(
       'goldencross_apiToken'
     );
-    const newCrossingTypeList = this.storageService.getSavedState(
-      'goldencross_crossingTypeList'
-    );
-    const newStocks = this.storageService.getSavedState('goldencross_stocks');
-    const newRulesets = this.storageService.getSavedState(
+    const newCrossingTypeList: CrossingType[] =
+      this.storageService.getSavedState('goldencross_crossingTypeList');
+    const newStocks: Stock[] =
+      this.storageService.getSavedState('goldencross_stocks');
+    const newRulesets: Ruleset[] = this.storageService.getSavedState(
       'goldencross_rulesets'
     );
 
@@ -156,6 +168,9 @@ export class StateService {
       this.crossingTypeList.next(newCrossingTypeList);
     }
     if (newStocks !== undefined) {
+      newStocks.forEach((s) =>
+        s.analyzedPeriods?.forEach((p) => p.resultsPerRulesets === undefined)
+      );
       this.stocks.next(newStocks);
     }
     if (newRulesets !== undefined) {
@@ -172,13 +187,23 @@ export class StateService {
   }
 
   /** Emits true to show hidden columns on the data entry table. */
-  public showColumns() {
+  public showManuallyHiddenColumns() {
     this.showColumnsAction.next(true);
   }
 
+  /** Emits true to show hidden stocks on the data entry table. */
+  public showHiddenStocks() {
+    this.showStocksAction.next(true);
+  }
+
   /** Emits true to show all hidden columns on the data entry table. */
-  public showAllColumns() {
-    this.showAllColumnsAction.next(true);
+  public showCrossingColumns() {
+    this.hideMACrossings.next(!this.hideMACrossings.value);
+  }
+
+  /** Emits true to show all hidden columns on the data entry table. */
+  public showPeriodRows() {
+    this.showPeriods.next(!this.showPeriods.value);
   }
 
   /** Updates the data, regenerates the crossing types with it, and saves everything in local storage. */

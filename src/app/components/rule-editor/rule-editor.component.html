@@ -214,9 +214,10 @@
                     >
                     <small class="col-12 form-text text-muted">
                       The formula used to determine if this rule is to be
-                      executed. For exemple, "avg &gt; curr" mean that this rule
-                      would be a buy for this turn if the current price (curr)
-                      is lower than the cost average of your precedent entries.
+                      executed. For exemple, "avg - avg * 5 / 100 &lt; curr"
+                      mean that this rule would be a buy for this turn if the
+                      cost average of your precedent entries (avg) is higher
+                      than the current price (curr).
                     </small>
                     <input
                       [value]="getFormula(rule)"
@@ -224,9 +225,21 @@
                       id="formula"
                       class="col12 form-control"
                       required="true"
-                      placeholder="avg > curr ? curr : -1"
+                      placeholder="avg > curr"
                       (input)="updateFormula(rule, $event)"
                     />
+                    <small class="col-12 mt-2 form-text text-muted">
+                      Possible keywords: <br />- price-before: The price at the
+                      beggining of this period, will be used instead of avg,
+                      last-used and last-of-type if no corresponding entries
+                      have been made <br />- avg: The cost average of your
+                      precedent entries <br />- last-used: The last price at
+                      which we decided to buy <br />- last-of-type: The last
+                      price at which we decided to buy for a specific type of
+                      crossing <br />- curr: The stock price at the moment of
+                      the crossing<br />- true: Always buy when encountering a
+                      crossing of this type
+                    </small>
                   </div>
                 </div>
               </div>
