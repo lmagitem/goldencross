@@ -129,10 +129,10 @@
       <ng-container *ngFor="let stock of sortedStocks">
         <ng-container *ngIf="!stock.hide">
           <tr>
-            <th scope="row">
+            <td>
               <a
-                class="btn btn-warning m-1"
-                placement="top"
+                class="btn btn-sm btn-warning"
+                placement="right"
                 ngbTooltip="Click here to hide that stock's rows"
                 container="body"
                 (click)="
@@ -143,21 +143,21 @@
                 >👁</a
               >
               <a
-                class="btn btn-danger m-1"
-                placement="top"
+                class="btn btn-sm btn-danger"
+                placement="right"
                 ngbTooltip="Click here to delete that stock"
                 container="body"
                 (click)="removeStock(stock)"
                 >🗑</a
               ><a
-                class="btn btn-primary m-1"
-                placement="top"
+                class="btn btn-sm btn-primary"
+                placement="right"
                 ngbTooltip="Click here to add the selected period"
                 container="body"
                 (click)="addPeriod(stock)"
                 >+</a
               >
-            </th>
+            </td>
             <td>
               {{ stock.name }}
             </td>
@@ -219,18 +219,22 @@
                 let periodIndex = index
               "
             >
-              <th scope="row">
+              <td>
                 <a
-                  class="btn btn-secondary m-1"
+                  *ngIf="false"
+                  class="btn btn-sm btn-secondary"
                   (click)="updatePeriod(anlzdPeriod, stock)"
                   >📡</a
                 >
                 <a
-                  class="btn btn-danger m-1"
+                  class="btn btn-sm btn-danger"
+                  placement="right"
+                  ngbTooltip="Click here to delete that period"
+                  container="body"
                   (click)="removePeriod(anlzdPeriod, stock)"
                   >-</a
                 >
-              </th>
+              </td>
               <td class="faded">
                 {{ stock.name }}
               </td>
@@ -317,15 +321,21 @@
         </ng-container>
       </ng-container>
       <tr>
-        <th scope="row">
-          <a class="btn btn-primary m-1" (click)="addStock()">+</a>
-        </th>
         <td>
-          <span class="form-group" style="display: inline-block">
+          <a
+            class="btn btn-sm btn-primary"
+            placement="right"
+            ngbTooltip="Click here to add a stock"
+            container="body"
+            (click)="addStock()"
+            >+</a
+          >
+        </td>
+        <td>
+          <span class="form-group">
             <input
               id="stockname"
               name="stockname"
-              style="display: inline-block"
               type="text"
               placeholder="Stock name"
               class="form-control input-md"
@@ -369,17 +379,25 @@
               <input
                 id="currenttag"
                 type="text"
-                placeholder="Tag, Other tag, And another one"
+                placeholder="Write a tag here and click on '+'"
                 class="form-control"
                 [value]="currentTag"
                 (keyup)="updateCurrentTag($event)"
               />
             </div>
             <div class="col-1 pl-1">
-              <a class="btn btn-primary ml-1" (click)="addTag()">+</a>
+              <a
+                class="btn btn-sm btn-primary m-1"
+                placement="top"
+                ngbTooltip="Click here to add a tag"
+                container="body"
+                (click)="addTag()"
+                >+</a
+              >
             </div>
 
             <shared-closable-tag
+              *ngIf="toTags().length > 0"
               class="col-12 py-3"
               [tags]="toTags()"
               (change)="updateTags($event)"
