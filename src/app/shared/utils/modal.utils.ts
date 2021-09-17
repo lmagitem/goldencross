@@ -7,12 +7,14 @@ export class ModalUtils {
     modalRef: NgbModalRef,
     title: string,
     content: string,
-    cancellationLabel: string,
-    validationLabel: string
+    cancellationLabel?: string,
+    validationLabel?: string
   ) {
     modalRef.componentInstance.title = title;
     modalRef.componentInstance.content = content;
     modalRef.componentInstance.cancellationLabel = cancellationLabel;
-    modalRef.componentInstance.validationLabel = validationLabel;
+    if (validationLabel) {
+      modalRef.componentInstance.validationLabel = validationLabel;
+    }
   }
 }

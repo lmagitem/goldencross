@@ -13,7 +13,7 @@ export class ConfirmModalComponent {
   /** The modal's content. */
   content: string = 'Content';
   /** The text to display for the NO button. */
-  cancellationLabel: string = 'Cancel';
+  cancellationLabel: string | undefined = 'Cancel';
   /** The text to display for the YES button. */
   validationLabel: string = 'OK';
 

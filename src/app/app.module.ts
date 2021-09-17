@@ -13,8 +13,9 @@ import { ResultsDisplayComponent } from './components/results-display/results-di
 import { RuleEditorComponent } from './components/rule-editor/rule-editor.component';
 import { ClosableTagComponent } from './shared/components/closable-tag/closable-tag.component';
 import { ConfirmModalComponent } from './shared/components/confirm-modal/confirm-modal.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ProgressBarComponent } from './shared/components/progress-bar/progress-bar.component';
+import { HttpErrorInterceptor } from './shared/interceptors/http-error.interceptor';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,14 @@ import { ProgressBarComponent } from './shared/components/progress-bar/progress-
     FormsModule,
     ReactiveFormsModule,
   ],
-  providers: [FormBuilder],
+  providers: [
+    FormBuilder,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HttpErrorInterceptor,
+      multi: true,
+    },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

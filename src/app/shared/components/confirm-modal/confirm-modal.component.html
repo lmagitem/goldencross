@@ -12,6 +12,7 @@
 <div class="modal-body" [innerHTML]="content"></div>
 <div class="modal-footer">
   <button
+    *ngIf="cancellationLabel"
     type="button"
     class="btn btn-outline-secondary"
     (click)="modal.dismiss(true)"

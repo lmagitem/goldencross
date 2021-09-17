@@ -259,8 +259,15 @@ export class RuleEditorComponent implements OnInit, OnDestroy {
             this.rulesetForm = ruleset;
             this.activeRule = 0;
           } else {
-            alert(
+            const modalRef = this.modalService.open(ConfirmModalComponent);
+            ModalUtils.fillInstance(
+              modalRef,
+              'Warning',
               "Unable to save your changes, there must be incorrect values in your rules or the ruleset's fields."
+            );
+            modalRef.result.then(
+              (res) => {},
+              (dismiss) => {}
             );
           }
         },

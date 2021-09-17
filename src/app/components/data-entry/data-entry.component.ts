@@ -38,6 +38,7 @@ import { ModalUtils } from 'src/app/shared/utils/modal.utils';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { MathUtils } from 'src/app/shared/utils/math.utils';
 import { EnumUtils } from 'src/app/shared/utils/enum.utils';
+import { ProgressBarService } from 'src/app/services/progress-bar/progress-bar.service';
 
 /** Empty stock used to add new ones. */
 const EMPTY_STOCK = {
@@ -150,7 +151,10 @@ export class DataEntryComponent implements OnInit, OnDestroy {
         (stock.analyzedPeriods !== undefined &&
           stock.analyzedPeriods.findIndex(
             (anlzdPrd) => anlzdPrd.period.name === p.name
-          ) === -1)
+          ) === -1 &&
+          new Date(stock.infos?.startDate || '')
+            .toJSON()
+            .localeCompare(new Date(p.startDate).toJSON()) <= 0)
     );
   }
 
@@ -363,20 +367,44 @@ export class DataEntryComponent implements OnInit, OnDestroy {
 
   /** Add a new stock to the list from the data given by the user. */
   public addStock() {
-    this.dataProcessingService
-      .processStock(this.newStock)
-      .then((stock) => {
-        this.stateService.addStock(stock);
-        this.newStock = _.cloneDeep(EMPTY_STOCK);
-      })
-      .catch((e) => {
-        console.error(e);
-        alert(
-          'An error has been encountered. It is probable that the stock ' +
-            this.newStock.name +
-            " doesn't exist in Tiingo's (our data provider) database, or that you made a typo on its ticker symbol."
-        );
-      });
+    if (
+      this.newStock.ticker === undefined ||
+      this.newStock.ticker === null ||
+      this.newStock.ticker.trim() === ''
+    ) {
+      const modalRef = this.modalService.open(ConfirmModalComponent);
+      ModalUtils.fillInstance(
+        modalRef,
+        'Error',
+        "You haven't provided a valid ticker in the ticker column for that new stock."
+      );
+      modalRef.result.then(
+        (res) => {},
+        (dismiss) => {}
+      );
+    } else {
+      this.dataProcessingService
+        .processStock(this.newStock)
+        .then((stock) => {
+          this.stateService.addStock(stock);
+          this.newStock = _.cloneDeep(EMPTY_STOCK);
+        })
+        .catch((e) => {
+          console.error(e);
+          const modalRef = this.modalService.open(ConfirmModalComponent);
+          ModalUtils.fillInstance(
+            modalRef,
+            'Error',
+            'An error has been encountered. It is probable that the stock ' +
+              this.newStock.name +
+              " doesn't exist in Tiingo's (our data provider) database, or that you made a typo on its ticker symbol."
+          );
+          modalRef.result.then(
+            (res) => {},
+            (dismiss) => {}
+          );
+        });
+    }
   }
 
   /** Removes the selected stock from the table. */

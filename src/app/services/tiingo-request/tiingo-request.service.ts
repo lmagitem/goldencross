@@ -7,6 +7,9 @@ import { StringUtils } from 'src/app/shared/utils/string.utils';
 import { TickerInfos } from 'src/app/shared/models/ticker-infos.model';
 import { EndOfDayPrice } from 'src/app/shared/models/end-of-day-price.model';
 import { Stock } from 'src/app/shared/models/stock.model';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ConfirmModalComponent } from 'src/app/shared/components/confirm-modal/confirm-modal.component';
+import { ModalUtils } from 'src/app/shared/utils/modal.utils';
 
 /** Retreives market data from Tiingo. */
 @Injectable({
@@ -18,7 +21,11 @@ export class TiingoRequestService implements OnDestroy {
   /** The API token used to retreive data from Tiingo. */
   private token = '';
 
-  constructor(private http: HttpClient, private stateService: StateService) {
+  constructor(
+    private http: HttpClient,
+    private stateService: StateService,
+    private modalService: NgbModal
+  ) {
     this.subs.sink = this.stateService.apiToken$.subscribe(
       (token) => (this.token = token)
     );
@@ -31,6 +38,19 @@ export class TiingoRequestService implements OnDestroy {
 
   /** Returns general infos about a given ticker and its available data on Tiingo. */
   getInfos(stock: Stock): Observable<HttpResponse<TickerInfos>> {
+    if (this.token === undefined || this.token === null || this.token === '') {
+      const modalRef = this.modalService.open(ConfirmModalComponent);
+      ModalUtils.fillInstance(
+        modalRef,
+        'Error',
+        "You haven't provided a valid API token for Tiingo, you can do that in the 'Json data' tab."
+      );
+      modalRef.result.then(
+        (res) => {},
+        (dismiss) => {}
+      );
+    }
+
     const headers = new HttpHeaders().append(
       'Content-Type',
       'application/json'
@@ -50,6 +70,19 @@ export class TiingoRequestService implements OnDestroy {
     startDate: Date,
     endDate?: Date
   ): Observable<HttpResponse<EndOfDayPrice[]>> {
+    if (this.token === undefined || this.token === null || this.token === '') {
+      const modalRef = this.modalService.open(ConfirmModalComponent);
+      ModalUtils.fillInstance(
+        modalRef,
+        'Error',
+        "You haven't provided a valid API token for Tiingo, you can do that in the 'Json data' tab."
+      );
+      modalRef.result.then(
+        (res) => {},
+        (dismiss) => {}
+      );
+    }
+
     const headers = new HttpHeaders().append(
       'Content-Type',
       'application/json'
