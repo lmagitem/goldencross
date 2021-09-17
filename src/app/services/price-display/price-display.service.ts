@@ -112,30 +112,43 @@ export class PriceDisplayService {
   /** Returns a string usable in html to display the given analysis results with proper formatting. */
   public getAnalysisResultsWithClass(results: AnalysisResults): string {
     return (
-      this.getGrowthPercentageWithClass(results.gainsAfterTwoYears) +
+      this.getGrowthWithClass(results.gainsAfterTwoYears) +
       '<br><span class="smaller">avg: ' +
       results.costAverage +
-      '<br>used: ' +
+      '<br>' +
       Math.round(results.usedCapital * 100) +
+      '% spent</span>'
+    );
+  }
+
+  /** Returns a string usable in html to display a growth percentage with proper formatting. */
+  public getGrowthWithClass(growth: number) {
+    return (
+      '<span class="' +
+      this.getPriceClass(this.getGrowthScore(growth)) +
+      ' bigger">' +
+      (growth >= 0 ? '+' : '') +
+      Math.round(growth * 10000) / 100 +
       '%</span>'
     );
   }
 
   /** Returns a string usable in html to display a growth result and a percentage of capital used. */
-  public getGrowthAndPercentageWithClass(
+  public getGrowthAndCapitalSpentWithClass(
     growth: number,
-    percentage: number
+    percentage: number,
+    wordCapital = true
   ): string {
     return (
-      this.getGrowthPercentageWithClass(growth) +
+      this.getGrowthWithClass(growth) +
       '<br>' +
       Math.round(percentage * 100) +
-      '% capital spent'
+      `% ${wordCapital ? 'capital ' : ''}spent`
     );
   }
 
   /** Returns a string usable in html to display a number followed by its growth percentage with proper formatting. */
-  public getPriceAndGrowthPercentageWithClass(
+  public getGrowthAndPriceAndCapitalSpentWithClass(
     previous: number,
     current: number
   ) {
@@ -147,18 +160,6 @@ export class PriceDisplayService {
       '<span class="' +
       this.getPriceClass(this.getGrowthScore(growth)) +
       '">' +
-      (growth >= 0 ? '+' : '') +
-      Math.round(growth * 10000) / 100 +
-      '%</span>'
-    );
-  }
-
-  /** Returns a string usable in html to display a growth percentage with proper formatting. */
-  public getGrowthPercentageWithClass(growth: number) {
-    return (
-      '<span class="' +
-      this.getPriceClass(this.getGrowthScore(growth)) +
-      ' bigger">' +
       (growth >= 0 ? '+' : '') +
       Math.round(growth * 10000) / 100 +
       '%</span>'

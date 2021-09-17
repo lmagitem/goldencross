@@ -277,7 +277,7 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     ruleset: Ruleset
   ): string {
     if (period === 'all') {
-      const result =
+      const growth =
         stock.analyzedPeriods
           .map((p) => {
             const results = this.analysisService.processDataWithRuleset(
@@ -289,9 +289,27 @@ export class DataEntryComponent implements OnInit, OnDestroy {
             return results.gainsAfterTwoYears;
           })
           .reduce((a, b) => a + b, 0) / stock.analyzedPeriods.length;
+      const percentage =
+        stock.analyzedPeriods
+          .map((p) => {
+            const results = this.analysisService.processDataWithRuleset(
+              stock,
+              p,
+              ruleset
+            );
+            this.loggingService.log(LogType.ANALYSIS_PROCESS, results.log);
+            return results.usedCapital;
+          })
+          .reduce((a, b) => a + b, 0) / stock.analyzedPeriods.length;
 
-      return MathUtils.isNumeric(result)
-        ? this.priceDisplayService.getGrowthPercentageWithClass(result)
+      return MathUtils.isNumeric(growth) && MathUtils.isNumeric(percentage)
+        ? this.priceDisplayService.getGrowthAndCapitalSpentWithClass(
+            growth,
+            percentage,
+            false
+          )
+        : MathUtils.isNumeric(growth)
+        ? this.priceDisplayService.getGrowthWithClass(growth)
         : '';
     } else {
       const results = this.analysisService.processDataWithRuleset(
@@ -491,21 +509,21 @@ export class DataEntryComponent implements OnInit, OnDestroy {
   /** Format growth percentage for display in the table. */
   public getGrowthWithClass(o: number | Stock): string {
     if (typeof o === 'number') {
-      return this.priceDisplayService.getGrowthPercentageWithClass(o);
+      return this.priceDisplayService.getGrowthWithClass(o);
     } else {
       const n =
         o.analyzedPeriods
           ?.map((p) => p.periodGrowth)
           .reduce((a, b) => a + b, 0) / o.analyzedPeriods.length;
       return MathUtils.isNumeric(n)
-        ? this.priceDisplayService.getGrowthPercentageWithClass(n)
+        ? this.priceDisplayService.getGrowthWithClass(n)
         : '';
     }
   }
 
   /** Format number and growth percentage for display in the table. */
   public getPriceAndGrowthWithClass(previous: number, current: number): string {
-    return this.priceDisplayService.getPriceAndGrowthPercentageWithClass(
+    return this.priceDisplayService.getGrowthAndPriceAndCapitalSpentWithClass(
       previous,
       current
     );

@@ -102,7 +102,7 @@ export class ResultsDisplayComponent implements OnInit, OnDestroy {
     );
 
     return MathUtils.isNumeric(growth / entries)
-      ? this.priceDisplayService.getGrowthPercentageWithClass(growth / entries)
+      ? this.priceDisplayService.getGrowthWithClass(growth / entries)
       : '';
   }
 
@@ -162,7 +162,7 @@ export class ResultsDisplayComponent implements OnInit, OnDestroy {
     });
 
     return analysisResults.length > 0
-      ? this.priceDisplayService.getGrowthAndPercentageWithClass(
+      ? this.priceDisplayService.getGrowthAndCapitalSpentWithClass(
           analysisResults
             .map((r) => r.gainsAfterTwoYears)
             .reduce((a, b) => a + b, 0) / analysisResults.length,
@@ -200,7 +200,7 @@ export class ResultsDisplayComponent implements OnInit, OnDestroy {
     });
 
     return analysisResults.length > 0
-      ? this.priceDisplayService.getGrowthAndPercentageWithClass(
+      ? this.priceDisplayService.getGrowthAndCapitalSpentWithClass(
           analysisResults
             .map((r) => r.gainsAfterTwoYears)
             .reduce((a, b) => a + b, 0) / analysisResults.length,
