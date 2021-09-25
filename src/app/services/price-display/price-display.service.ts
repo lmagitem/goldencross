@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { DateUtils } from 'src/app/shared/utils/date.utils';
 import { MathUtils } from 'src/app/shared/utils/math.utils';
 import { Timescale } from '../../shared/enums/timescale.enum';
 import { AnalysisResults } from '../../shared/models/analysis-results.model';
@@ -119,6 +120,27 @@ export class PriceDisplayService {
       Math.round(results.usedCapital * 100) +
       '% spent</span>'
     );
+  }
+
+  /** Returns a string usable in html to display the price entries of the given analysis results with proper formatting. */
+  public getResultEntriesTooltip(results: AnalysisResults): string {
+    let result =
+      results?.entries?.length > 0
+        ? 'Found the following entry points:'
+        : 'No proper entry point found.';
+    let firstLine = true;
+    results?.entries?.forEach((e) => {
+      result +=
+        (firstLine ? ' on ' : ', on ') +
+        this.getPriceTimestamp(e.date, Timescale.OD) +
+        ' at ' +
+        MathUtils.roundTwoDecimal(e.price) +
+        ' (' +
+        MathUtils.roundTwoDecimal(MathUtils.returnPercentage(e.spent, 1)) +
+        '%)';
+      firstLine = false;
+    });
+    return result;
   }
 
   /** Returns a string usable in html to display a growth percentage with proper formatting. */

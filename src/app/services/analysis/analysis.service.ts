@@ -11,6 +11,7 @@ import { StringUtils } from 'src/app/shared/utils/string.utils';
 import { PriceService } from '../price/price.service';
 import { Period } from 'src/app/shared/models/period.model';
 import * as _ from 'lodash';
+import { EntryPoint } from 'src/app/shared/models/entry-point.model';
 
 /** Provides functions to analyse and process price movements. */
 @Injectable({
@@ -26,6 +27,7 @@ export class AnalysisService {
     anlzdPeriod: AnalysedPeriod,
     ruleset: Ruleset
   ): AnalysisResults {
+    const entries: EntryPoint[] = [];
     let results: AnalysisResults | undefined;
 
     // If we already calculated a value for this, reuse it
@@ -114,6 +116,11 @@ export class AnalysisService {
                   lastUsed = result;
                   found = true;
 
+                  entries.push({
+                    date: new Date(crossing.timestamp),
+                    price: result,
+                    spent: currentSplit,
+                  });
                   log +=
                     (turn !== 1 ? ', ' : '') +
                     Math.round(currentSplit * 100) +
@@ -146,7 +153,7 @@ export class AnalysisService {
           );
 
     // Save the results before returning them
-    results = { costAverage, gainsAfterTwoYears, usedCapital, log };
+    results = { costAverage, gainsAfterTwoYears, usedCapital, entries, log };
     if (
       anlzdPeriod.resultsPerRulesets === undefined ||
       !(anlzdPeriod.resultsPerRulesets instanceof Map)

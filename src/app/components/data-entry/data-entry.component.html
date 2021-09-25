@@ -206,11 +206,17 @@
               class="global-results"
               [innerHTML]="getGrowthWithClass(stock)"
             ></td>
-            <td
-              *ngFor="let column of rulesetColumns"
-              class="global-results"
-              [innerHTML]="getAnalysisResults(stock, 'all', column.ruleset)"
-            ></td>
+            <ng-container *ngFor="let column of rulesetColumns">
+              <td
+                *ngFor="
+                  let results of [
+                    getAnalysisResults(stock, 'all', column.ruleset)
+                  ]
+                "
+                class="global-results"
+                [innerHTML]="formatResults(results, 'all')"
+              ></td
+            ></ng-container>
           </tr>
           <ng-container *ngIf="showPeriods">
             <tr
@@ -309,13 +315,20 @@
               <td
                 [innerHTML]="getGrowthWithClass(anlzdPeriod.periodGrowth)"
               ></td>
-              <td
-                *ngFor="let column of rulesetColumns"
-                class="results"
-                [innerHTML]="
-                  getAnalysisResults(stock, anlzdPeriod, column.ruleset)
-                "
-              ></td>
+              <ng-container *ngFor="let column of rulesetColumns">
+                <td
+                  *ngFor="
+                    let results of [
+                      getAnalysisResults(stock, anlzdPeriod, column.ruleset)
+                    ]
+                  "
+                  class="results"
+                  placement="top"
+                  [ngbTooltip]="formatResultEntries(results)"
+                  container="body"
+                  [innerHTML]="formatResults(results)"
+                ></td
+              ></ng-container>
             </tr>
           </ng-container>
         </ng-container>

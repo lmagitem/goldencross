@@ -7,5 +7,5 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'Golden Cross';
-  version = 'Version 1.0.1';
+  version = 'Version 1.0.2';
 }

@@ -39,6 +39,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { MathUtils } from 'src/app/shared/utils/math.utils';
 import { EnumUtils } from 'src/app/shared/utils/enum.utils';
 import { ProgressBarService } from 'src/app/services/progress-bar/progress-bar.service';
+import { AnalysisResults } from 'src/app/shared/models/analysis-results.model';
 
 /** Empty stock used to add new ones. */
 const EMPTY_STOCK = {
@@ -270,12 +271,12 @@ export class DataEntryComponent implements OnInit, OnDestroy {
     return '-';
   }
 
-  /** Returns a displayable version of the analysis results corresponding to the given data. */
+  /** Returns the analysis results corresponding to the given data. */
   public getAnalysisResults(
     stock: Stock,
     period: AnalysedPeriod | 'all',
     ruleset: Ruleset
-  ): string {
+  ): AnalysisResults {
     if (period === 'all') {
       const growth =
         stock.analyzedPeriods
@@ -303,14 +304,28 @@ export class DataEntryComponent implements OnInit, OnDestroy {
           .reduce((a, b) => a + b, 0) / stock.analyzedPeriods.length;
 
       return MathUtils.isNumeric(growth) && MathUtils.isNumeric(percentage)
-        ? this.priceDisplayService.getGrowthAndCapitalSpentWithClass(
-            growth,
-            percentage,
-            false
-          )
+        ? {
+            costAverage: 0,
+            gainsAfterTwoYears: growth,
+            usedCapital: percentage,
+            entries: [],
+            log: '',
+          }
         : MathUtils.isNumeric(growth)
-        ? this.priceDisplayService.getGrowthWithClass(growth)
-        : '';
+        ? {
+            costAverage: 0,
+            gainsAfterTwoYears: growth,
+            usedCapital: Number.MIN_SAFE_INTEGER,
+            entries: [],
+            log: '',
+          }
+        : {
+            costAverage: 0,
+            gainsAfterTwoYears: Number.MIN_SAFE_INTEGER,
+            usedCapital: Number.MIN_SAFE_INTEGER,
+            entries: [],
+            log: '',
+          };
     } else {
       const results = this.analysisService.processDataWithRuleset(
         stock,
@@ -318,8 +333,36 @@ export class DataEntryComponent implements OnInit, OnDestroy {
         ruleset
       );
       this.loggingService.log(LogType.ANALYSIS_PROCESS, results.log);
+      return results;
+    }
+  }
+
+  /** Returns a displayable version of the analysis results corresponding to the given data. */
+  public formatResults(
+    results: AnalysisResults,
+    period?: undefined | 'all'
+  ): string {
+    if (period === 'all') {
+      return results.gainsAfterTwoYears !== Number.MIN_SAFE_INTEGER &&
+        results.usedCapital !== Number.MIN_SAFE_INTEGER
+        ? this.priceDisplayService.getGrowthAndCapitalSpentWithClass(
+            results.gainsAfterTwoYears,
+            results.usedCapital,
+            false
+          )
+        : results.gainsAfterTwoYears !== Number.MIN_SAFE_INTEGER
+        ? this.priceDisplayService.getGrowthWithClass(
+            results.gainsAfterTwoYears
+          )
+        : '';
+    } else {
       return this.priceDisplayService.getAnalysisResultsWithClass(results);
     }
+  }
+
+  /** Returns a displayable version of the given analysis results' price entries. */
+  public formatResultEntries(results: AnalysisResults): string {
+    return this.priceDisplayService.getResultEntriesTooltip(results);
   }
 
   /** Returns a simple formatted date. */
