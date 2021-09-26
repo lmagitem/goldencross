@@ -12,6 +12,7 @@ import { PriceService } from '../price/price.service';
 import { Period } from 'src/app/shared/models/period.model';
 import * as _ from 'lodash';
 import { EntryPoint } from 'src/app/shared/models/entry-point.model';
+import { number } from 'mathjs';
 
 /** Provides functions to analyse and process price movements. */
 @Injectable({
@@ -97,7 +98,11 @@ export class AnalysisService {
 
                 const currentSplit = MathUtils.returnPercentage(
                   ruleset.split[turn - 1],
-                  ruleset.split.reduce((a, b) => a + b, 0),
+                  ruleset.split.reduce(
+                    (a, b) =>
+                      Number.parseFloat(a + '') + Number.parseFloat(b + ''),
+                    0
+                  ),
                   '1'
                 );
 
