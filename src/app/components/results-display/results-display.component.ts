@@ -165,9 +165,16 @@ export class ResultsDisplayComponent implements OnInit, OnDestroy {
       ? this.priceDisplayService.getGrowthAndCapitalSpentWithClass(
           analysisResults
             .map((r) => r.gainsAfterTwoYears)
-            .reduce((a, b) => a + b, 0) / analysisResults.length,
-          analysisResults.map((r) => r.usedCapital).reduce((a, b) => a + b, 0) /
-            analysisResults.length
+            .reduce(
+              (a, b) => Number.parseFloat(a + '') + Number.parseFloat(b + ''),
+              0
+            ) / analysisResults.length,
+          analysisResults
+            .map((r) => r.usedCapital)
+            .reduce(
+              (a, b) => Number.parseFloat(a + '') + Number.parseFloat(b + ''),
+              0
+            ) / analysisResults.length
         )
       : '';
   }
@@ -203,9 +210,16 @@ export class ResultsDisplayComponent implements OnInit, OnDestroy {
       ? this.priceDisplayService.getGrowthAndCapitalSpentWithClass(
           analysisResults
             .map((r) => r.gainsAfterTwoYears)
-            .reduce((a, b) => a + b, 0) / analysisResults.length,
-          analysisResults.map((r) => r.usedCapital).reduce((a, b) => a + b, 0) /
-            analysisResults.length
+            .reduce(
+              (a, b) => Number.parseFloat(a + '') + Number.parseFloat(b + ''),
+              0
+            ) / analysisResults.length,
+          analysisResults
+            .map((r) => r.usedCapital)
+            .reduce(
+              (a, b) => Number.parseFloat(a + '') + Number.parseFloat(b + ''),
+              0
+            ) / analysisResults.length
         )
       : '';
   }

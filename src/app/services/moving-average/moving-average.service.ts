@@ -45,7 +45,12 @@ export class MovingAverageService {
 
     // Add every EoD price from the array and divide
     return (
-      data.map((p) => p.adjClose).reduce((a, b) => a + b, 0) / movingAverage
+      data
+        .map((p) => p.adjClose)
+        .reduce(
+          (a, b) => Number.parseFloat(a + '') + Number.parseFloat(b + ''),
+          0
+        ) / movingAverage
     );
   }
 

@@ -175,8 +175,11 @@ export class DataProcessingService {
           )
         );
         const highestMA =
-          movingAveragesToCalculate.reduce((a, b) => (a >= b ? a : b), 0) ||
-          200;
+          movingAveragesToCalculate.reduce(
+            (a, b) =>
+              a >= b ? Number.parseFloat(a + '') : Number.parseFloat(b + ''),
+            0
+          ) || 200;
 
         this.loggingService.log(
           LogType.DATA_PROCESSING,

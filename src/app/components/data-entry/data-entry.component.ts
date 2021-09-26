@@ -289,7 +289,10 @@ export class DataEntryComponent implements OnInit, OnDestroy {
             this.loggingService.log(LogType.ANALYSIS_PROCESS, results.log);
             return results.gainsAfterTwoYears;
           })
-          .reduce((a, b) => a + b, 0) / stock.analyzedPeriods.length;
+          .reduce(
+            (a, b) => Number.parseFloat(a + '') + Number.parseFloat(b + ''),
+            0
+          ) / stock.analyzedPeriods.length;
       const percentage =
         stock.analyzedPeriods
           .map((p) => {
@@ -301,7 +304,10 @@ export class DataEntryComponent implements OnInit, OnDestroy {
             this.loggingService.log(LogType.ANALYSIS_PROCESS, results.log);
             return results.usedCapital;
           })
-          .reduce((a, b) => a + b, 0) / stock.analyzedPeriods.length;
+          .reduce(
+            (a, b) => Number.parseFloat(a + '') + Number.parseFloat(b + ''),
+            0
+          ) / stock.analyzedPeriods.length;
 
       return MathUtils.isNumeric(growth) && MathUtils.isNumeric(percentage)
         ? {
@@ -557,7 +563,10 @@ export class DataEntryComponent implements OnInit, OnDestroy {
       const n =
         o.analyzedPeriods
           ?.map((p) => p.periodGrowth)
-          .reduce((a, b) => a + b, 0) / o.analyzedPeriods.length;
+          .reduce(
+            (a, b) => Number.parseFloat(a + '') + Number.parseFloat(b + ''),
+            0
+          ) / o.analyzedPeriods.length;
       return MathUtils.isNumeric(n)
         ? this.priceDisplayService.getGrowthWithClass(n)
         : '';
