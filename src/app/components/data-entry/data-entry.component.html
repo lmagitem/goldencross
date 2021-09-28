@@ -354,6 +354,7 @@
               class="form-control input-md"
               [value]="newStock.name"
               (keyup)="updateCurrentName($event)"
+              (change)="updateCurrentName($event)"
             />
           </span>
         </td>
@@ -367,6 +368,7 @@
               class="form-control input-md"
               [value]="newStock.ticker"
               (keyup)="updateCurrentTicker($event)"
+              (change)="updateCurrentTicker($event)"
             />
           </span>
         </td>
@@ -396,6 +398,7 @@
                 class="form-control"
                 [value]="currentTag"
                 (keyup)="updateCurrentTag($event)"
+                (change)="updateCurrentTag($event)"
               />
             </div>
             <div class="col-1 pl-1">
