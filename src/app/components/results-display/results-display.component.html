@@ -75,7 +75,14 @@
       </thead>
       <tbody class="bigger">
         <tr>
-          <th scope="row">Growth after 2 years</th>
+          <th scope="row">Average growth during recession periods</th>
+          <td
+            *ngFor="let ruleset of rulesets"
+            [innerHTML]="getSimplePeriodGrowthBySector()"
+          ></td>
+        </tr>
+        <tr>
+          <th scope="row">Average growth after 2 years</th>
           <td
             *ngFor="let ruleset of rulesets"
             [innerHTML]="getSimpleGrowthAfterTwoYears(ruleset)"
@@ -119,6 +126,14 @@
           <th
             scope="col"
             placement="bottom"
+            ngbTooltip="The growth percentage of the stock between the start and the end of the period (smoothed using a 5 days moving average)"
+            container="body"
+          >
+            Period Growth
+          </th>
+          <th
+            scope="col"
+            placement="bottom"
             ngbTooltip="The result of the period analysis using the ruleset {{
               ruleset.name
             }} - are displayed the growth factor between the cost average of the simulated entry and the '+2Y Price', the cost average of the simulated entry, and the percentage of allocated capital used"
@@ -135,6 +150,8 @@
             <td>{{ enumToString(sector) }}</td>
             <td class="faded">All industries</td>
             <td class="faded">All periods</td>
+
+            <td [innerHTML]="getSimplePeriodGrowthBySector(sector)"></td>
             <td
               *ngFor="let ruleset of rulesets"
               [innerHTML]="
@@ -160,6 +177,11 @@
                 {{ period.name }}
               </td>
               <td
+                [innerHTML]="
+                  getSimplePeriodGrowthBySector(sector, undefined, period)
+                "
+              ></td>
+              <td
                 *ngFor="let ruleset of rulesets"
                 [innerHTML]="
                   getSectorResults(ruleset, sector, undefined, period)
@@ -172,6 +194,9 @@
               <td class="faded">{{ enumToString(sector) }}</td>
               <td>{{ enumToString(industry) }}</td>
               <td class="faded">All periods</td>
+              <td
+                [innerHTML]="getSimplePeriodGrowthBySector(sector, industry)"
+              ></td>
               <td
                 *ngFor="let ruleset of rulesets"
                 [innerHTML]="
@@ -196,6 +221,11 @@
                 >
                   {{ period.name }}
                 </td>
+                <td
+                  [innerHTML]="
+                    getSimplePeriodGrowthBySector(sector, industry, period)
+                  "
+                ></td>
                 <td
                   *ngFor="let ruleset of rulesets"
                   [innerHTML]="
@@ -227,6 +257,14 @@
           <th
             scope="col"
             placement="bottom"
+            ngbTooltip="The growth percentage of the stock between the start and the end of the period (smoothed using a 5 days moving average)"
+            container="body"
+          >
+            Period Growth
+          </th>
+          <th
+            scope="col"
+            placement="bottom"
             ngbTooltip="The result of the period analysis using the ruleset {{
               ruleset.name
             }} - are displayed the growth factor between the cost average of the simulated entry and the '+2Y Price', the cost average of the simulated entry, and the percentage of allocated capital used"
@@ -242,6 +280,7 @@
           <tr>
             <td>{{ tag }}</td>
             <td class="faded">All periods</td>
+            <td [innerHTML]="getSimplePeriodGrowthByTag(tag)"></td>
             <td
               *ngFor="let ruleset of rulesets"
               [innerHTML]="getTagResults(ruleset, tag, undefined)"
@@ -263,6 +302,7 @@
               >
                 {{ period.name }}
               </td>
+              <td [innerHTML]="getSimplePeriodGrowthByTag(tag, period)"></td>
               <td
                 *ngFor="let ruleset of rulesets"
                 [innerHTML]="getTagResults(ruleset, tag, period)"

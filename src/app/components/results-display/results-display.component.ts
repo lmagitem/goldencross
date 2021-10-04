@@ -106,6 +106,65 @@ export class ResultsDisplayComponent implements OnInit, OnDestroy {
       : '';
   }
 
+  /** Returns a displayable version of the period growth. */
+  public getSimplePeriodGrowthBySector(
+    sector?: Sector | undefined,
+    industry?: Industry | undefined,
+    period?: Period | undefined
+  ): string {
+    let entries = 0;
+    let growth = 0;
+    this.stocks.forEach((stock) => {
+      if (sector === undefined || stock.sector === sector) {
+        if (industry === undefined || stock.industry === industry) {
+          stock.analyzedPeriods.forEach((anlzdPeriod) => {
+            if (
+              (period === undefined ||
+                anlzdPeriod.period.name === period.name) &&
+              anlzdPeriod.periodGrowth !== undefined
+            ) {
+              growth += anlzdPeriod.periodGrowth;
+              entries++;
+            }
+          });
+        }
+      }
+    });
+
+    return MathUtils.isNumeric(growth / entries)
+      ? this.priceDisplayService.getGrowthWithClass(growth / entries)
+      : '';
+  }
+
+  /** Returns a displayable version of the period growth. */
+  public getSimplePeriodGrowthByTag(
+    tag: string,
+    period?: Period | undefined
+  ): string {
+    let entries = 0;
+    let growth = 0;
+    this.stocks.forEach((stock) => {
+      if (
+        stock.tags !== undefined &&
+        stock.tags.findIndex((t) => t === tag) !== -1
+      ) {
+        stock.analyzedPeriods.forEach((anlzdPeriod) => {
+          if (
+            (period === undefined || anlzdPeriod.period.name === period.name) &&
+            anlzdPeriod.periodGrowth !== undefined
+          ) {
+            growth += anlzdPeriod.periodGrowth;
+            entries++;
+          }
+        });
+      }
+    });
+
+    return MathUtils.isNumeric(growth / entries)
+      ? this.priceDisplayService.getGrowthWithClass(growth / entries)
+      : '';
+  }
+
   /** Returns a displayable version of the analysis results corresponding to the given data. */
   public getSimplePercentageSpent(ruleset: Ruleset): string {
     let entries = 0;
