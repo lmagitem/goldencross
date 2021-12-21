@@ -1,6 +1,6 @@
 # Golden Cross
 
-This app is a tool to help you define entry strategies in the stock market during a crash/recession. **You can find it [by following this link](http://http://217.69.8.86/)**.
+This app is a tool to help you define entry strategies in the stock market during a crash/recession. **You can find it [by following this link](http://http://217.69.8.86/)** (unavailable atm).
 
 - The idea is to come up with a set of rules that determines if you buy or not and at which point in order to get the maximum result after two years of growth. By testing those rules on historical data, you can get an idea of which strategy is the most profitable for stocks with specific criteria.
 - The app enables you to write rules of entry using golden crosses on moving averages, and to see how well your rules would have done during the last crashes/recessions. You get global results, but also more precise ones corresponding to the sector/industry/period or other custom tags you've given to the analysed stocks.
